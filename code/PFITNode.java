@@ -1,0 +1,363 @@
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.OptionalDouble;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
+
+
+
+public class PFITNode {
+    private List<String> itemset;
+    private double sup;
+    private double esup;
+    private double psup;
+    private double lb;
+    private double ub;
+    private PFITNode parent;
+    private List<PFITNode> children;
+    public UncertainDatabase database;
+
+    public PFITNode(List<String> itemset,UncertainDatabase database) {
+        this.itemset = itemset;
+        this.children = new ArrayList<>();
+        this.database = database;
+        this.sup = 0.0;
+        this.esup = 0.0;
+        this.psup = 0.0;
+        this.lb = 0.0;
+        this.ub = 0.0;        
+    }
+    
+    public List<PFITNode> getRightSiblings() {
+        if (parent == null) {
+            return new ArrayList<>();
+        }
+    
+        int sizeOfCurrentNode = this.getItems().size(); // Giả sử 'size' là phương thức trả về kích cỡ của node
+        List<PFITNode> rightSiblings = new ArrayList<>();
+        boolean found = false;
+    
+        for (PFITNode sibling : parent.getChildren()) {
+            if (sibling == this) {
+                found = true;
+            } else if (found && sibling.getItems().size() == sizeOfCurrentNode) {
+                rightSiblings.add(sibling);
+            }
+        }
+    
+        return rightSiblings;
+    }
+
+    // Additional methods as required
+
+    public void addChild(PFITNode child) {
+        int existingChildIndex = indexOfChildWithItemset(child.getItems());
+        if (existingChildIndex != -1) {
+            // Replace the existing child
+            this.children.set(existingChildIndex, child);
+        } else {
+            // Add as a new child
+            this.children.add(child);
+        }
+        child.setParent(this);
+    }
+    
+    private int indexOfChildWithItemset(List<String> itemset) {
+        for (int i = 0; i < children.size(); i++) {
+            if (new HashSet<>(children.get(i).getItems()).equals(new HashSet<>(itemset))) {
+                return i;
+            }
+        }
+        return -1; // Return -1 if no match is found
+    }
+
+    public List<PFITNode> getChildren() {
+        return this.children;
+    }
+
+    public List<String> getItems(){
+        return itemset;
+    }
+
+    public PFITNode getParent() {
+        return parent;
+    }
+
+    private void setParent(PFITNode parent) {
+        this.parent = parent;
+    }
+
+    public double getSupport() {
+        return sup;
+    }
+
+    public void setSupport(double sup) {
+        this.sup = sup;
+    }
+
+    public double getExpSup() {
+        return esup;
+    }
+
+    public void setExpSup(double esup) {
+        this.esup = esup;
+    }
+
+    public double getProb() {
+        return psup;
+    }
+
+    public void setProb(double psup) {
+        this.psup = psup;
+    }
+
+    public double getLB() {
+        return lb;
+    }
+
+    public void setLB(double lb) {
+        this.lb = lb;
+    }
+
+    public double getUB() {
+        return ub;
+    }
+
+    public void setUB(double ub) {
+        this.ub = ub;
+    }
+
+    @Override
+    public String toString() {
+        return "PFITNode{" +
+                "itemset=" + itemset +
+                ", sup=" + sup +
+                ", esup=" + esup +
+                ", psup=" + psup +
+                ", lb=" + lb +
+                ", ub=" + ub +
+                '}';
+    }
+
+    public PFITNode generateChildNode(PFITNode nY) {
+        // Use a HashSet for better performance
+        Set<String> combinedItemset = new HashSet<>(this.itemset);
+        combinedItemset.addAll(nY.itemset);
+    
+        // Convert the set back to a list
+        List<String> newItemset = new ArrayList<>(combinedItemset);
+        
+    
+        // Create a new node with the combined, unique itemset
+        PFITNode childNode = new PFITNode(newItemset, database);
+
+        // childNode.setSupport(Supporteds(newItemset));
+
+        // Check if the child node already exists
+        if (!isChildNodeExists(childNode)) {
+            return childNode;
+        } else {
+            return null; // Return null if the child node already exists
+        }
+    }
+    
+    private boolean isChildNodeExists(PFITNode childNode) {
+        return children.contains(childNode);
+    }
+
+    private Double cachedUBsResult; // Cache result for optimization
+
+    public boolean isFrequent(double miniprob, double minisup) {
+        if (cachedUBsResult == null) {
+            cachedUBsResult = UBs(itemset, miniprob);
+        }
+        return cachedUBsResult >= minisup;
+    }
+    
+    public boolean isSingleElementSubset(List<String> name, List<String> items) {
+        // Iterate over each element in 'name'
+        for (String element : name) {
+            // Check if the current element is not in 'items'
+            if (!items.contains(element)) {
+                return false;
+            }
+        }
+    
+        // If all elements of 'name' are in 'items', return true
+        return true;
+    }
+
+    public boolean checkProb(double lb, double ub, double minisup){
+        return lb <= minisup && ub >= minisup;
+    }
+
+    public boolean checkFrequenDel(double OLB, double OUB, double OPS, double ULB, double UUB, double UPS, double minisupp){
+        boolean ans1 = OLB < minisupp && OUB >= minisupp && ULB < minisupp && UUB >= minisupp && OPS >= minisupp && UPS >= minisupp;
+        boolean ans2 = OLB >= minisupp && ULB >= minisupp;
+        boolean ans3 = OLB >= minisupp && ULB < minisupp;
+       
+        return ans1 || ans2 || ans3;
+    }
+    
+    
+
+    public boolean checkInfrequent(double OLB, double OUB, double OPS, double ULB, double UUB, double UPS, double minisupp){
+        boolean ans1 = OLB < minisupp && OUB >= minisupp && ULB < minisupp && UUB >= minisupp && OPS >= minisupp && UPS < minisupp;
+        boolean ans2 = OLB < minisupp && OUB >= minisupp && UUB < minisupp && OPS >= minisupp;
+        boolean ans3 = OUB >= minisupp && ULB < minisupp && UPS < minisupp;
+       
+        return ans1 || ans2 || ans3;
+    }
+
+    public boolean checkNewFrequent(double OLB, double OUB, double OPS, double ULB, double UUB, double UPS, double minisupp){
+        boolean ans1 = OLB < minisupp && OUB >= minisupp && ULB < minisupp && UUB >= minisupp && OPS < minisupp && UPS >= minisupp;
+        boolean ans2 = OLB < minisupp && OUB >= minisupp && ULB >= minisupp && OPS < minisupp;
+        boolean ans3 = OUB < minisupp && UUB >= minisupp && UPS >= minisupp;
+       
+        return ans1 || ans2 || ans3;
+    }
+
+    public boolean checkFrequent(double OLB, double OUB, double OPS, double ULB, double UUB, double UPS, double minisupp){
+        boolean ans1 = OLB < minisupp && OUB >= minisupp && ULB < minisupp && UUB >= minisupp && OPS >= minisupp;
+        boolean ans2 = OLB < minisupp && OUB >= minisupp && ULB >= minisupp && OPS >= minisupp;
+        boolean ans3 = OLB >= minisupp;
+        return ans1 || ans2 || ans3; 
+    }
+
+    // public double Supporteds(List<String> requiredItems) {
+    //     return database.getTransactionLists().stream()
+    //             .filter(a -> a.uncertainItemset.uncertainitem.stream().map(t -> t.name).collect(Collectors.toList()).containsAll(requiredItems))
+    //             .count();
+    // }
+    public double Supporteds(List<String> requiredItems) {
+        return database.name.stream().filter(transaction -> transaction.containsAll(requiredItems))
+        .count();
+    }
+
+
+    // public double ExpSups(List<String> requiredItems ) {
+    //     return database.getTransactionLists().stream()
+    //             .filter(a -> a.uncertainItemset.uncertainitem.stream().map(t -> t.name).collect(Collectors.toList()).containsAll(requiredItems))
+    //             .mapToDouble(transaction ->
+    //                     transaction.uncertainItemset.uncertainitem.stream()
+    //                             .filter(t -> requiredItems.contains(t.name))
+    //                             .mapToDouble(t -> t.probability)
+    //                             .reduce(1, (acc, probability) -> acc * probability)
+    //             )
+    //             .sum();
+    // }
+    public double ExpSups(List<String> requiredItems) {
+    return IntStream.range(0, database.name.size())
+            .filter(i -> {
+                List<String> transactionItemNames = database.name.get(i);
+                return transactionItemNames.containsAll(requiredItems);
+            })
+            .mapToDouble(i -> {
+                double transactionProbability = IntStream.range(0, requiredItems.size())
+                        .mapToDouble(j -> {
+                            int index = database.name.get(i).indexOf(requiredItems.get(j));
+                            return (index != -1) ? database.prob.get(i).get(index) : 1.0;
+                        })
+                        .reduce(1, (acc, probability) -> acc * probability);
+
+                return transactionProbability;
+            })
+            .sum();
+}
+
+    // public double ProbabilityFrequents(List<String> requiredItems, double minValue) {
+    //     return database.getTransactionLists().stream()
+    //         .filter(transaction -> transaction.uncertainItemset.uncertainitem.stream()
+    //                 .map(t -> t.name)
+    //                 .collect(Collectors.toList())
+    //                 .containsAll(requiredItems))
+    //         .mapToDouble(transaction ->
+    //                 transaction.uncertainItemset.uncertainitem.stream()
+    //                         .filter(t -> requiredItems.contains(t.name) && t.probability >= minValue)
+    //                         .mapToDouble(t -> t.probability)
+    //                         .reduce(1, (acc, probability) -> acc * probability)
+    //         )
+    //         .count();
+    // }
+
+    public double ProbabilityFrequents(List<String> requiredItems, double minValue) {
+        return IntStream.range(0, database.name.size())
+                .filter(i -> database.name.get(i).containsAll(requiredItems))
+                .mapToDouble(i ->
+                        database.prob.get(i).stream()
+                                .filter(probability -> requiredItems.contains(database.name.get(i).get(database.prob.get(i).indexOf(probability))) && probability >= minValue)
+                                .reduce(1.0, (acc, probability) -> acc * probability)
+                )
+                .filter(result -> result > 0)  // Consider only transactions with non-zero probability
+                .count();
+    }
+
+
+    // public double LBs(List<String> requiredItems, double value) {
+    //     double expSups = ExpSups(requiredItems);
+    //     double sqrtTerm = Math.sqrt(-2 * expSups * Math.log(1 - value));
+    
+    //     double maxLB = database.getTransactionLists().stream()
+    //         .filter(a -> a.uncertainItemset.uncertainitem.stream().anyMatch(t -> requiredItems.contains(t.name)))
+    //         .mapToDouble(t -> Math.round((expSups - sqrtTerm) * 10.0) / 10.0)
+    //         .max()
+    //         .orElse(0.0);
+    
+    //     return Math.max(maxLB, 0);
+    // }
+    public double LBs(List<String> requiredItems, double value) {
+        double expSups = ExpSups(requiredItems);
+        double sqrtTerm = Math.sqrt(-2 * expSups * Math.log(1 - value));
+    
+        double maxLB = IntStream.range(0, database.name.size())
+                .filter(i -> database.name.get(i).stream().anyMatch(t -> requiredItems.contains(t)))
+                .mapToDouble(i -> Math.round((expSups - sqrtTerm) * 10.0) / 10.0)
+                .max()
+                .orElse(0.0);
+    
+        return Math.max(maxLB, 0);
+    }
+
+
+    // public double UBs(List<String> requiredItems, double value) {
+    //     double expSups = ExpSups(requiredItems);
+    //     double logValue = Math.log(value);
+    //     double sqrtTerm = Math.sqrt(Math.pow(logValue, 2) - 8 * expSups * logValue);
+    
+    //     OptionalDouble optionalMax = database.getTransactionLists().stream()
+    //             .filter(a -> a.uncertainItemset.uncertainitem.stream().anyMatch(t -> requiredItems.contains(t.name)))
+    //             .mapToDouble(t -> Math.round(((2 * expSups - logValue + sqrtTerm) / 2) * 10.0) / 10.0)
+    //             .max();
+    
+    //     double v = optionalMax.orElse(0.0); // Giả sử 0.0 là giá trị mặc định phù hợp
+    //     return Math.min(v, Supporteds(requiredItems));
+    // }
+
+    public double UBs(List<String> requiredItems, double value) {
+        double expSups = ExpSups(requiredItems);
+        double logValue = Math.log(value);
+        double sqrtTerm = Math.sqrt(Math.pow(logValue, 2) - 8 * expSups * logValue);
+    
+        OptionalDouble optionalMax = IntStream.range(0, database.name.size())
+                .filter(i -> database.name.get(i).stream().anyMatch(t -> requiredItems.contains(t)))
+                .mapToDouble(i -> Math.round(((2 * expSups - logValue + sqrtTerm) / 2) * 10.0) / 10.0)
+                .max();
+    
+        double v = optionalMax.orElse(0.0); // Giả sử 0.0 là giá trị mặc định phù hợp
+        return Math.min(v, Supporteds(requiredItems));
+    }
+    
+    
+
+    private double Max(double a, double b) {
+        return a > b? a : b;
+    }
+
+    private double Min(double a, double b) {
+        return a < b? a : b;
+    }
+}
