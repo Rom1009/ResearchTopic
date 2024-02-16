@@ -8,17 +8,65 @@ public class Test {
         PFIT P = new PFIT();
         PFMIoS PM = new PFMIoS();
 
-        List<List<String>> items = database.distinctItem();
         List<String> ro= new ArrayList<String>();
         ro.add("Root");
-        PFITNode root = new PFITNode(ro, database);
-        for (List<String> item: items) {   
-            root.addChild(new PFITNode(item, database));
+        
+        
+        // Define the batch size
+        int batchSize = 10000;
+        // Get the transaction lists
+        List<UncertainTransaction> transactionLists = database.getTransactionLists();
+        // Process transactions in batches
+        List<UncertainTransaction> batch = transactionLists.subList(0, batchSize);
+        for (UncertainTransaction transaction : batch) {
+            List<String> res = new ArrayList<String>();
+            List<Double> res1 = new ArrayList<Double>();
+
+            for (int i = 0; i < transaction.uncertainItemset.uncertainItems.size(); i++){
+                res.add(transaction.uncertainItemset.uncertainItems.get(i).name);
+                res1.add(transaction.uncertainItemset.uncertainItems.get(i).probability);
+
+            }
+            database.name1.add(res);
+            database.prob1.add(res1);
         }
-        P.Buildtree(root, 0, 4, 0.1);
+
+
+        long startTime = System.nanoTime();
+        PFITNode root = new PFITNode(ro, database, database.name1);
+        for (int i = 0; i < batchSize; i += batchSize) {
+            // Create a sublist containing the current batch of transactions
+            // // Compute distinct items for the current batch
+            List<List<String>> distinctItems = database.computeDistinctItemForBatch(batch);
+            // // Process distinct items
+            for (List<String> distinctItem : distinctItems) {
+                // Create a new root node for the current distinct item
+                PFITNode newNode = new PFITNode(distinctItem, database, database.name1);
+                // Add the new node as a child to the root
+                root.addChild(newNode);
+            }
+        }
+        P.Buildtree(root, batchSize, 0.9, 0.9);
+
+        long endTime = System.nanoTime();
+        System.out.println("Execution Time: " + (endTime - startTime) + " nanoseconds");
+        long startTime1 = System.nanoTime();
+        for (int i = batchSize ;i < transactionLists.size(); i++){
+            database.addNewTransaction(database.name.get(i), database.prob.get(i));
+        }
+        PM.ADDTRANS(root, 0, database, 0.9, 0.9);
+        PM.DelTran(root, 0, database, 0.9, 0.9);
+        long endTime1 = System.nanoTime();
+        System.out.println("Execution Time: " + (endTime1 - startTime1) + " nanoseconds");
+
+
+        // List<List<String>> items = database.distinctItem();
         
-        
-        
+        // database.getTransactionLists();
+        // for (List<String> item: items) {   
+        //     root.addChild(new PFITNode(item, database));
+        // }
+        // P.Buildtree(root, 0, 1, 0.9);
         // List<String> item = new ArrayList<String>();
         // List<Double> prob = new ArrayList<Double>();
         // item.add("B");
@@ -31,18 +79,14 @@ public class Test {
         // prob.add(0.8);
         // database.addNewTransaction(item, prob);
         // ReadDataFile rf = new ReadDataFile();
-        // try {
-        //     rf.readDataWithProbabilities("b.txt");
-        // }
-        // catch (Exception e){
-        //     e.printStackTrace();
-        // }
         // for (int i = 0; i < rf.getName().size(); i++) {
         //     database.addNewTransaction(rf.getName().get(i), rf.getProbs().get(i));
         // }
         // PM.ADDTRANS(root, 0, database, 4, 0.1);
-        // database.transactionLists.remove(0);
-
+        
         // PM.DelTran(root,0, database, 4, 0.1);
+        for (PFITNode child : root.getChildren()) {
+            System.out.println(child);
+        }
     }
 }

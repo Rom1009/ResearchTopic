@@ -1,53 +1,55 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.RecursiveAction;
 
 public class PFIT {
 
-    public void measureExecutionTime(Runnable code) {
-        long startTime = System.nanoTime();
-        code.run();
-        long endTime = System.nanoTime();
-        long executionTime = endTime - startTime;
-
-        System.out.println("Execution Time: " + executionTime + " nanoseconds");
-    }
+    // Utilize a ForkJoinPool to potentially parallelize some of the operations.
+    private ForkJoinPool pool = new ForkJoinPool();
 
     public void Buildtree(PFITNode nXs, int US, double minisup, double miniprob) {
-        measureExecutionTime(() -> {
-            List<PFITNode> xs = new ArrayList<>();
-            for (PFITNode nX : nXs.getChildren()) {
-                processNode(nX, miniprob, minisup, xs);
+        // long startTime = System.nanoTime();
+
+        // Use RecursiveAction for parallel execution if applicable.
+        pool.invoke(new RecursiveAction() {
+            @Override
+            protected void compute() {
+                List<PFITNode> xs = new ArrayList<>();
+                nXs.getChildren().parallelStream().forEach(nX -> processNode(nX, miniprob, minisup, xs));
+                nXs.getChildren().addAll(xs);
             }
-            nXs.getChildren().addAll(xs);
         });
+
+        // long endTime = System.nanoTime();
+        // System.out.println("Execution Time: " + (endTime - startTime) + " nanoseconds");
     }
 
     private void processNode(PFITNode nX, double miniprob, double minisup, List<PFITNode> xs) {
-        boolean isFrequentX = nX.isFrequent(miniprob, minisup);
         updateNodeMetrics(nX, miniprob);
-
-        if (!isFrequentX) {
-            nX.setProb(nX.ProbabilityFrequents(nX.getItems(), miniprob));
+        if (!nX.isFrequent(minisup, nX.getUB())) {
             return;
-        }
-
-        List<PFITNode> nodes = nX.getRightSiblings();
-        for (PFITNode node : nodes) {
-            if (node.isFrequent(miniprob, minisup)) {
+        }        
+        nX.setProb(nX.ProbabilityFrequents(nX.getItems(), miniprob));
+        nX.getRightSiblings().parallelStream().forEach(node -> {
+            if (node.isFrequent(minisup, node.getUB())) {
                 PFITNode child = nX.generateChildNode(node);
                 updateNodeMetrics(child, miniprob);
-                xs.add(child);
-                if (child.checkProb(child.getLB(), child.getUB(), minisup)) {
-                    child.setProb(child.ProbabilityFrequents(child.getItems(), miniprob));
+                if (child.getLB() <= minisup && child.getUB() >= minisup){
+                    child.setProb(node.ProbabilityFrequents(child.getItems(), miniprob));
+                }
+                synchronized (xs) {
+                    xs.add(child);
                 }
             }
-        }
+        });
     }
 
     private void updateNodeMetrics(PFITNode node, double miniprob) {
+        // Assume these methods are optimized as well.
         node.setSupport(node.Supporteds(node.getItems()));
         node.setExpSup(node.ExpSups(node.getItems()));
-        node.setLB(node.LBs(node.getItems(), miniprob));
-        node.setUB(node.UBs(node.getItems(), miniprob));
+        node.setLB(node.LBs(node.getExpSup(), node.getProb()));
+        node.setUB(node.UBs(node.getExpSup(), node.getProb(), node.getSupport()));
     }
 }

@@ -20,11 +20,14 @@ public class PFITNode {
     private PFITNode parent;
     private List<PFITNode> children;
     public UncertainDatabase database;
+    public List<List<String>> batch;
 
-    public PFITNode(List<String> itemset,UncertainDatabase database) {
+
+    public PFITNode(List<String> itemset,UncertainDatabase database, List<List<String>> batch) {
         this.itemset = itemset;
         this.children = new ArrayList<>();
         this.database = database;
+        this.batch = batch;
         this.sup = 0.0;
         this.esup = 0.0;
         this.psup = 0.0;
@@ -153,7 +156,7 @@ public class PFITNode {
         
     
         // Create a new node with the combined, unique itemset
-        PFITNode childNode = new PFITNode(newItemset, database);
+        PFITNode childNode = new PFITNode(newItemset, database, batch);
 
         // childNode.setSupport(Supporteds(newItemset));
 
@@ -169,11 +172,12 @@ public class PFITNode {
         return children.contains(childNode);
     }
 
+
     private Double cachedUBsResult; // Cache result for optimization
 
-    public boolean isFrequent(double miniprob, double minisup) {
+    public boolean isFrequent(double minisup, double ub) {
         if (cachedUBsResult == null) {
-            cachedUBsResult = UBs(itemset, miniprob);
+            cachedUBsResult = ub;
         }
         return cachedUBsResult >= minisup;
     }
@@ -186,7 +190,6 @@ public class PFITNode {
                 return false;
             }
         }
-    
         // If all elements of 'name' are in 'items', return true
         return true;
     }
@@ -229,37 +232,41 @@ public class PFITNode {
     }
 
     // public double Supporteds(List<String> requiredItems) {
-    //     return database.getTransactionLists().stream()
+    //     return database.transactionLists.stream()
     //             .filter(a -> a.uncertainItemset.uncertainitem.stream().map(t -> t.name).collect(Collectors.toList()).containsAll(requiredItems))
     //             .count();
     // }
     public double Supporteds(List<String> requiredItems) {
-        return database.name.stream().filter(transaction -> transaction.containsAll(requiredItems))
+        // return batch.stream().
+        // filter(a -> a.uncertainItemset.uncertainItems.stream().map(t -> t.name).collect(Collectors.toList()).containsAll(requiredItems))
+        // .count();
+        return batch.stream().filter(transaction -> transaction.containsAll(requiredItems))
         .count();
     }
 
 
     // public double ExpSups(List<String> requiredItems ) {
-    //     return database.getTransactionLists().stream()
-    //             .filter(a -> a.uncertainItemset.uncertainitem.stream().map(t -> t.name).collect(Collectors.toList()).containsAll(requiredItems))
+    //     return batch.stream()
+    //             .filter(a -> a.uncertainItemset.uncertainItems.stream().map(t -> t.name).collect(Collectors.toList()).containsAll(requiredItems))
     //             .mapToDouble(transaction ->
-    //                     transaction.uncertainItemset.uncertainitem.stream()
+    //                     transaction.uncertainItemset.uncertainItems.stream()
     //                             .filter(t -> requiredItems.contains(t.name))
     //                             .mapToDouble(t -> t.probability)
     //                             .reduce(1, (acc, probability) -> acc * probability)
     //             )
     //             .sum();
     // }
+
     public double ExpSups(List<String> requiredItems) {
-    return IntStream.range(0, database.name.size())
+        return IntStream.range(0, batch.size())
             .filter(i -> {
-                List<String> transactionItemNames = database.name.get(i);
+                List<String> transactionItemNames = batch.get(i);
                 return transactionItemNames.containsAll(requiredItems);
             })
             .mapToDouble(i -> {
                 double transactionProbability = IntStream.range(0, requiredItems.size())
                         .mapToDouble(j -> {
-                            int index = database.name.get(i).indexOf(requiredItems.get(j));
+                            int index = batch.get(i).indexOf(requiredItems.get(j));
                             return (index != -1) ? database.prob.get(i).get(index) : 1.0;
                         })
                         .reduce(1, (acc, probability) -> acc * probability);
@@ -267,16 +274,16 @@ public class PFITNode {
                 return transactionProbability;
             })
             .sum();
-}
+    }
 
     // public double ProbabilityFrequents(List<String> requiredItems, double minValue) {
-    //     return database.getTransactionLists().stream()
-    //         .filter(transaction -> transaction.uncertainItemset.uncertainitem.stream()
+    //     return batch.stream()
+    //         .filter(transaction -> transaction.uncertainItemset.uncertainItems.stream()
     //                 .map(t -> t.name)
     //                 .collect(Collectors.toList())
     //                 .containsAll(requiredItems))
     //         .mapToDouble(transaction ->
-    //                 transaction.uncertainItemset.uncertainitem.stream()
+    //                 transaction.uncertainItemset.uncertainItems.stream()
     //                         .filter(t -> requiredItems.contains(t.name) && t.probability >= minValue)
     //                         .mapToDouble(t -> t.probability)
     //                         .reduce(1, (acc, probability) -> acc * probability)
@@ -285,11 +292,11 @@ public class PFITNode {
     // }
 
     public double ProbabilityFrequents(List<String> requiredItems, double minValue) {
-        return IntStream.range(0, database.name.size())
-                .filter(i -> database.name.get(i).containsAll(requiredItems))
+        return IntStream.range(0, batch.size())
+                .filter(i -> batch.get(i).containsAll(requiredItems))
                 .mapToDouble(i ->
                         database.prob.get(i).stream()
-                                .filter(probability -> requiredItems.contains(database.name.get(i).get(database.prob.get(i).indexOf(probability))) && probability >= minValue)
+                                .filter(probability -> requiredItems.contains(batch.get(i).get(database.prob.get(i).indexOf(probability))) && probability >= minValue)
                                 .reduce(1.0, (acc, probability) -> acc * probability)
                 )
                 .filter(result -> result > 0)  // Consider only transactions with non-zero probability
@@ -309,19 +316,30 @@ public class PFITNode {
     
     //     return Math.max(maxLB, 0);
     // }
-    public double LBs(List<String> requiredItems, double value) {
-        double expSups = ExpSups(requiredItems);
-        double sqrtTerm = Math.sqrt(-2 * expSups * Math.log(1 - value));
+    // public double LBs(List<String> requiredItems, double value) {
+    //     double expSups = ExpSups(requiredItems);
+    //     double sqrtTerm = Math.sqrt(-2 * expSups * Math.log(1 - value));
     
-        double maxLB = IntStream.range(0, database.name.size())
-                .filter(i -> database.name.get(i).stream().anyMatch(t -> requiredItems.contains(t)))
-                .mapToDouble(i -> Math.round((expSups - sqrtTerm) * 10.0) / 10.0)
-                .max()
-                .orElse(0.0);
+    //     double maxLB = IntStream.range(0, database.name.size())
+    //             .filter(i -> database.name.get(i).stream().anyMatch(t -> requiredItems.contains(t)))
+    //             .mapToDouble(i -> Math.round((expSups - sqrtTerm) * 10.0) / 10.0)
+    //             .max()
+    //             .orElse(0.0);
     
-        return Math.max(maxLB, 0);
+    //     return Math.max(maxLB, 0);
+    // }
+
+    public double LBs(double expectedSupport, double probabilityParameter) {
+        double lowerBound = expectedSupport - (-2 * expectedSupport * Math.log(1 - probabilityParameter));
+        return Max(lowerBound, 0);
     }
 
+    // Upper Bound (ub)
+    public double UBs(double expectedSupport, double probabilityParameter, double support) {
+        double upperBound = 2 * expectedSupport - Math.log(probabilityParameter) + Math.sqrt(Math.log(2 * probabilityParameter) - 8 * expectedSupport * Math.log(probabilityParameter)) / 2;
+        return Min(upperBound, support);
+    }
+    
 
     // public double UBs(List<String> requiredItems, double value) {
     //     double expSups = ExpSups(requiredItems);
@@ -337,19 +355,19 @@ public class PFITNode {
     //     return Math.min(v, Supporteds(requiredItems));
     // }
 
-    public double UBs(List<String> requiredItems, double value) {
-        double expSups = ExpSups(requiredItems);
-        double logValue = Math.log(value);
-        double sqrtTerm = Math.sqrt(Math.pow(logValue, 2) - 8 * expSups * logValue);
+    // public double UBs(List<String> requiredItems, double value) {
+    //     double expSups = ExpSups(requiredItems);
+    //     double logValue = Math.log(value);
+    //     double sqrtTerm = Math.sqrt(Math.pow(logValue, 2) - 8 * expSups * logValue);
     
-        OptionalDouble optionalMax = IntStream.range(0, database.name.size())
-                .filter(i -> database.name.get(i).stream().anyMatch(t -> requiredItems.contains(t)))
-                .mapToDouble(i -> Math.round(((2 * expSups - logValue + sqrtTerm) / 2) * 10.0) / 10.0)
-                .max();
+    //     OptionalDouble optionalMax = IntStream.range(0, database.name.size())
+    //             .filter(i -> database.name.get(i).stream().anyMatch(t -> requiredItems.contains(t)))
+    //             .mapToDouble(i -> Math.round(((2 * expSups - logValue + sqrtTerm) / 2) * 10.0) / 10.0)
+    //             .max();
     
-        double v = optionalMax.orElse(0.0); // Giả sử 0.0 là giá trị mặc định phù hợp
-        return Math.min(v, Supporteds(requiredItems));
-    }
+    //     double v = optionalMax.orElse(0.0); // Giả sử 0.0 là giá trị mặc định phù hợp
+    //     return Math.min(v, Supporteds(requiredItems));
+    // }
     
     
 

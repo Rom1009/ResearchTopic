@@ -1,4 +1,8 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 class UncertainItem {
     String name;
@@ -11,10 +15,10 @@ class UncertainItem {
 }
 
 class UncertainItemset {
-    List<UncertainItem> uncertainitem;
+    List<UncertainItem> uncertainItems;
 
-    UncertainItemset(List<UncertainItem> uncertainitem) {
-        this.uncertainitem = uncertainitem;
+    UncertainItemset(List<UncertainItem> uncertainItems) {
+        this.uncertainItems = uncertainItems;
     }
 }
 
@@ -32,15 +36,25 @@ public class UncertainDatabase {
 
     public List<UncertainTransaction> transactionLists;
     public List<List<String>> name;
+    public List<List<String>> name1;
+
     public List<List<Double>> prob;
+    public List<List<Double>> prob1;
+
 
     public UncertainDatabase() {
         transactionLists = new ArrayList<>();
+        name = new ArrayList<>();
+        prob = new ArrayList<>();
+
+        name1 = new ArrayList<>();
+        prob1 = new ArrayList<>();
+
         try {
             // Assuming ReadDataFile class reads data and initializes name and prob
             // with corresponding values from the file.
             ReadDataFile rf = new ReadDataFile();
-            rf.readDataWithProbabilities("file.txt");
+            rf.readDataWithProbabilities("connect.txt");
             name = rf.getName();
             prob = rf.getProbs();
         } catch (Exception e) {
@@ -49,20 +63,20 @@ public class UncertainDatabase {
     }
 
     public List<UncertainTransaction> getTransactionLists() {
+        transactionLists = new ArrayList<>();
         int size = name.size();
-        transactionLists = new ArrayList<>(size);
 
         for (int i = 0; i < size; i++) {
             List<String> itemNames = name.get(i);
             List<Double> itemProbs = prob.get(i);
             int itemSize = itemNames.size();
 
-            List<UncertainItem> itemLists = new ArrayList<>(itemSize);
+            List<UncertainItem> itemList = new ArrayList<>(itemSize);
             for (int j = 0; j < itemSize; j++) {
-                itemLists.add(new UncertainItem(itemNames.get(j), itemProbs.get(j)));
+                itemList.add(new UncertainItem(itemNames.get(j), itemProbs.get(j)));
             }
 
-            UncertainItemset uncertainItems = new UncertainItemset(itemLists);
+            UncertainItemset uncertainItems = new UncertainItemset(itemList);
             UncertainTransaction uncertainTransaction = new UncertainTransaction("UT" + i, uncertainItems);
             transactionLists.add(uncertainTransaction);
         }
@@ -78,32 +92,37 @@ public class UncertainDatabase {
             return;
         }
 
-        name.add(titles);
-        prob.add(probs);
-        List<UncertainItem> itemLists = new ArrayList<>(size);
-        for (int i = 0; i < size; i++) {
-            itemLists.add(new UncertainItem(titles.get(i), probs.get(i)));
-        }
+        name1.add(titles);
+        prob1.add(probs);
+        // List<UncertainItem> itemList = new ArrayList<>(size);
+        // for (int i = 0; i < size; i++) {
+        //     itemList.add(new UncertainItem(titles.get(i), probs.get(i)));
+        // }
 
-        UncertainItemset uncertainItems = new UncertainItemset(itemLists);
-        UncertainTransaction uncertainTransaction = new UncertainTransaction("UT" + size, uncertainItems);
-        transactionLists.add(uncertainTransaction);
+        // UncertainItemset uncertainItems = new UncertainItemset(itemList);
+        // UncertainTransaction uncertainTransaction = new UncertainTransaction("UT" + size, uncertainItems);
+        // transactionLists.add(uncertainTransaction);
     }
 
-    public List<List<String>> distinctItem() {
+    public List<List<String>> computeDistinctItemForBatch(List<UncertainTransaction> batch) {
         Set<String> distinctSet = new LinkedHashSet<>();
-
-        for (List<String> row : name) {
-            distinctSet.addAll(row);
+    
+        for (UncertainTransaction transaction : batch) {
+            UncertainItemset itemset = transaction.uncertainItemset;
+            List<UncertainItem> itemList = itemset.uncertainItems;
+            for (UncertainItem item : itemList) {
+                distinctSet.add(item.name);
+            }
         }
-
+    
         List<List<String>> distinctList = new ArrayList<>(distinctSet.size());
         for (String item : distinctSet) {
             List<String> itemList = new ArrayList<>(1);
             itemList.add(item);
             distinctList.add(itemList);
         }
-
+    
         return distinctList;
     }
+    
 }
