@@ -94,14 +94,6 @@ public class UncertainDatabase {
 
         name1.add(titles);
         prob1.add(probs);
-        // List<UncertainItem> itemList = new ArrayList<>(size);
-        // for (int i = 0; i < size; i++) {
-        //     itemList.add(new UncertainItem(titles.get(i), probs.get(i)));
-        // }
-
-        // UncertainItemset uncertainItems = new UncertainItemset(itemList);
-        // UncertainTransaction uncertainTransaction = new UncertainTransaction("UT" + size, uncertainItems);
-        // transactionLists.add(uncertainTransaction);
     }
 
     public List<List<String>> computeDistinctItemForBatch(List<UncertainTransaction> batch) {

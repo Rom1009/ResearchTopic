@@ -31,14 +31,12 @@ public class Test {
             database.prob1.add(res1);
         }
 
-
         long startTime = System.nanoTime();
         PFITNode root = new PFITNode(ro, database, database.name1);
+        // // Compute distinct items for the current batch
+        // // Process distinct items
+        List<List<String>> distinctItems = database.computeDistinctItemForBatch(batch);
         for (int i = 0; i < batchSize; i += batchSize) {
-            // Create a sublist containing the current batch of transactions
-            // // Compute distinct items for the current batch
-            List<List<String>> distinctItems = database.computeDistinctItemForBatch(batch);
-            // // Process distinct items
             for (List<String> distinctItem : distinctItems) {
                 // Create a new root node for the current distinct item
                 PFITNode newNode = new PFITNode(distinctItem, database, database.name1);
@@ -47,19 +45,20 @@ public class Test {
             }
         }
         P.Buildtree(root, batchSize, 0.9, 0.9);
-
         long endTime = System.nanoTime();
         System.out.println("Execution Time: " + (endTime - startTime) + " nanoseconds");
+
         long startTime1 = System.nanoTime();
         for (int i = batchSize ;i < transactionLists.size(); i++){
             database.addNewTransaction(database.name.get(i), database.prob.get(i));
+            PM.ADDTRANS(root, i, database, 0.9, 0.9);
+            PM.DelTran(root, i, database, 0.9, 0.9);
         }
-        PM.ADDTRANS(root, 0, database, 0.9, 0.9);
-        PM.DelTran(root, 0, database, 0.9, 0.9);
+
         long endTime1 = System.nanoTime();
         System.out.println("Execution Time: " + (endTime1 - startTime1) + " nanoseconds");
 
-
+        System.out.println(database.name1.size());
         // List<List<String>> items = database.distinctItem();
         
         // database.getTransactionLists();
@@ -85,8 +84,8 @@ public class Test {
         // PM.ADDTRANS(root, 0, database, 4, 0.1);
         
         // PM.DelTran(root,0, database, 4, 0.1);
-        for (PFITNode child : root.getChildren()) {
-            System.out.println(child);
-        }
+        // for (PFITNode child : root.getChildren()) {
+        //     System.out.println(child);
+        // }
     }
 }

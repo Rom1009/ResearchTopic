@@ -183,17 +183,24 @@ public class PFITNode {
     }
     
     public boolean isSingleElementSubset(List<String> name, List<String> items) {
+        // If the size of 'name' is greater than 'items', 'name' cannot be a subset of 'items'
+        if (name.size() > items.size()) {
+            return false;
+        }
+        
+        Set<String> itemSet = new HashSet<>(items);
+    
         // Iterate over each element in 'name'
         for (String element : name) {
-            // Check if the current element is not in 'items'
-            if (!items.contains(element)) {
+            // Check if the current element is not in the HashSet
+            if (!itemSet.contains(element)) {
                 return false;
             }
         }
-        // If all elements of 'name' are in 'items', return true
+        // If all elements of 'name' are found in 'items', return true
         return true;
     }
-
+    
     public boolean checkProb(double lb, double ub, double minisup){
         return lb <= minisup && ub >= minisup;
     }
@@ -236,12 +243,59 @@ public class PFITNode {
     //             .filter(a -> a.uncertainItemset.uncertainitem.stream().map(t -> t.name).collect(Collectors.toList()).containsAll(requiredItems))
     //             .count();
     // }
-    public double Supporteds(List<String> requiredItems) {
-        // return batch.stream().
-        // filter(a -> a.uncertainItemset.uncertainItems.stream().map(t -> t.name).collect(Collectors.toList()).containsAll(requiredItems))
-        // .count();
-        return batch.stream().filter(transaction -> transaction.containsAll(requiredItems))
-        .count();
+    // public double Supporteds(List<String> requiredItems, List<List<String>> name1) {
+        
+    //     return name1.stream().filter(transaction -> transaction.containsAll(requiredItems))
+    //     .count();
+    // }
+
+    public double Supporteds(List<String> requiredItems, List<List<String>> name1) {
+        int count = 0;
+        for (List<String> transaction : name1) {
+            if (transaction.containsAll(requiredItems)) {
+                count++;
+            }
+        }
+        return count;
+    }
+    
+    public double ExpSups(List<String> requiredItems, List<List<String>> name1, List<List<Double>> prob1) {
+        double sum = 0.0;
+        for (int i = 0; i < name1.size(); i++) {
+            List<String> transactionItemNames = name1.get(i);
+            if (transactionItemNames.containsAll(requiredItems)) {
+                double transactionProbability = 1.0;
+                for (String item : requiredItems) {
+                    int index = transactionItemNames.indexOf(item);
+                    transactionProbability *= (index != -1) ? prob1.get(i).get(index) : 1.0;
+                }
+                sum += transactionProbability;
+            }
+        }
+        return sum;
+    }
+    
+    public double ProbabilityFrequents(List<String> requiredItems, double minValue, List<List<String>> name1, List<List<Double>> prob1) {
+        int count = 0;
+        for (int i = 0; i < name1.size(); i++) {
+            if (name1.get(i).containsAll(requiredItems)) {
+                double transactionProbability = 1.0;
+                for (int j = 0; j < requiredItems.size(); j++) {
+                    int index = name1.get(i).indexOf(requiredItems.get(j));
+                    double probability = prob1.get(i).get(index);
+                    if (requiredItems.contains(name1.get(i).get(index)) && probability >= minValue) {
+                        transactionProbability *= probability;
+                    } else {
+                        transactionProbability = 0.0; // Set probability to 0 if any item's probability is less than minValue
+                        break;
+                    }
+                }
+                if (transactionProbability > 0) {
+                    count++;
+                }
+            }
+        }
+        return count;
     }
 
 
@@ -257,24 +311,24 @@ public class PFITNode {
     //             .sum();
     // }
 
-    public double ExpSups(List<String> requiredItems) {
-        return IntStream.range(0, batch.size())
-            .filter(i -> {
-                List<String> transactionItemNames = batch.get(i);
-                return transactionItemNames.containsAll(requiredItems);
-            })
-            .mapToDouble(i -> {
-                double transactionProbability = IntStream.range(0, requiredItems.size())
-                        .mapToDouble(j -> {
-                            int index = batch.get(i).indexOf(requiredItems.get(j));
-                            return (index != -1) ? database.prob.get(i).get(index) : 1.0;
-                        })
-                        .reduce(1, (acc, probability) -> acc * probability);
+    // public double ExpSups(List<String> requiredItems, List<List<String>> name1, List<List<Double>> prob1) {
+    //     return IntStream.range(0, name1.size())
+    //         .filter(i -> {
+    //             List<String> transactionItemNames = name1.get(i);
+    //             return transactionItemNames.containsAll(requiredItems);
+    //         })
+    //         .mapToDouble(i -> {
+    //             double transactionProbability = IntStream.range(0, requiredItems.size())
+    //                     .mapToDouble(j -> {
+    //                         int index = name1.get(i).indexOf(requiredItems.get(j));
+    //                         return (index != -1) ? prob1.get(i).get(index) : 1.0;
+    //                     })
+    //                     .reduce(1, (acc, probability) -> acc * probability);
 
-                return transactionProbability;
-            })
-            .sum();
-    }
+    //             return transactionProbability;
+    //         })
+    //         .sum();
+    // }
 
     // public double ProbabilityFrequents(List<String> requiredItems, double minValue) {
     //     return batch.stream()
@@ -291,17 +345,17 @@ public class PFITNode {
     //         .count();
     // }
 
-    public double ProbabilityFrequents(List<String> requiredItems, double minValue) {
-        return IntStream.range(0, batch.size())
-                .filter(i -> batch.get(i).containsAll(requiredItems))
-                .mapToDouble(i ->
-                        database.prob.get(i).stream()
-                                .filter(probability -> requiredItems.contains(batch.get(i).get(database.prob.get(i).indexOf(probability))) && probability >= minValue)
-                                .reduce(1.0, (acc, probability) -> acc * probability)
-                )
-                .filter(result -> result > 0)  // Consider only transactions with non-zero probability
-                .count();
-    }
+    // public double ProbabilityFrequents(List<String> requiredItems, double minValue, List<List<String>> name1, List<List<Double>> prob1) {
+    //     return IntStream.range(0, name1.size())
+    //             .filter(i -> name1.get(i).containsAll(requiredItems))
+    //             .mapToDouble(i ->
+    //                     prob1.get(i).stream()
+    //                             .filter(probability -> requiredItems.contains(name1.get(i).get(prob1.get(i).indexOf(probability))) && probability >= minValue)
+    //                             .reduce(1.0, (acc, probability) -> acc * probability)
+    //             )
+    //             .filter(result -> result > 0)  // Consider only transactions with non-zero probability
+    //             .count();
+    // }
 
 
     // public double LBs(List<String> requiredItems, double value) {
@@ -329,14 +383,15 @@ public class PFITNode {
     //     return Math.max(maxLB, 0);
     // }
 
-    public double LBs(double expectedSupport, double probabilityParameter) {
-        double lowerBound = expectedSupport - (-2 * expectedSupport * Math.log(1 - probabilityParameter));
+    public double LBs(double expectedSupport, double miniprob) {
+        double v = Math.sqrt(-2 * expectedSupport * Math.log(1 - miniprob));
+        double lowerBound = expectedSupport - v;
         return Max(lowerBound, 0);
     }
 
     // Upper Bound (ub)
-    public double UBs(double expectedSupport, double probabilityParameter, double support) {
-        double upperBound = 2 * expectedSupport - Math.log(probabilityParameter) + Math.sqrt(Math.log(2 * probabilityParameter) - 8 * expectedSupport * Math.log(probabilityParameter)) / 2;
+    public double UBs(double expectedSupport, double miniprob, double support) {
+        double upperBound = 2 * expectedSupport - Math.log(miniprob) + Math.sqrt(Math.log(2 * miniprob) - 8 * expectedSupport * Math.log(miniprob)) / 2;
         return Min(upperBound, support);
     }
     

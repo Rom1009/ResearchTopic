@@ -30,13 +30,13 @@ public class PFIT {
         if (!nX.isFrequent(minisup, nX.getUB())) {
             return;
         }        
-        nX.setProb(nX.ProbabilityFrequents(nX.getItems(), miniprob));
+        nX.setProb(nX.ProbabilityFrequents(nX.getItems(), miniprob, nX.database.name1, nX.database.prob1));
         nX.getRightSiblings().parallelStream().forEach(node -> {
             if (node.isFrequent(minisup, node.getUB())) {
                 PFITNode child = nX.generateChildNode(node);
                 updateNodeMetrics(child, miniprob);
                 if (child.getLB() <= minisup && child.getUB() >= minisup){
-                    child.setProb(node.ProbabilityFrequents(child.getItems(), miniprob));
+                    child.setProb(node.ProbabilityFrequents(child.getItems(), miniprob,nX.database.name1, nX.database.prob1));
                 }
                 synchronized (xs) {
                     xs.add(child);
@@ -47,9 +47,9 @@ public class PFIT {
 
     private void updateNodeMetrics(PFITNode node, double miniprob) {
         // Assume these methods are optimized as well.
-        node.setSupport(node.Supporteds(node.getItems()));
-        node.setExpSup(node.ExpSups(node.getItems()));
-        node.setLB(node.LBs(node.getExpSup(), node.getProb()));
-        node.setUB(node.UBs(node.getExpSup(), node.getProb(), node.getSupport()));
+        node.setSupport(node.Supporteds(node.getItems(), node.database.name1));
+        node.setExpSup(node.ExpSups(node.getItems(),node.database.name1, node.database.prob1));
+        node.setLB(node.LBs(node.getExpSup(),miniprob));
+        node.setUB(node.UBs(node.getExpSup(), miniprob, node.getSupport()));
     }
 }
