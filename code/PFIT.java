@@ -4,14 +4,9 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
 
 public class PFIT {
-
-    // Utilize a ForkJoinPool to potentially parallelize some of the operations.
     private ForkJoinPool pool = new ForkJoinPool();
 
     public void Buildtree(PFITNode nXs, int US, double minisup, double miniprob) {
-        // long startTime = System.nanoTime();
-
-        // Use RecursiveAction for parallel execution if applicable.
         pool.invoke(new RecursiveAction() {
             @Override
             protected void compute() {
@@ -20,9 +15,6 @@ public class PFIT {
                 nXs.getChildren().addAll(xs);
             }
         });
-
-        // long endTime = System.nanoTime();
-        // System.out.println("Execution Time: " + (endTime - startTime) + " nanoseconds");
     }
 
     private void processNode(PFITNode nX, double miniprob, double minisup, List<PFITNode> xs) {
@@ -31,12 +23,16 @@ public class PFIT {
             return;
         }        
         nX.setProb(nX.ProbabilityFrequents(nX.getItems(), miniprob, nX.database.name1, nX.database.prob1));
+        // nX.Probability(nX.getSupport(), nX.getExpSup(), miniprob);
         nX.getRightSiblings().parallelStream().forEach(node -> {
-            if (node.isFrequent(minisup, node.getUB())) {
+            if (node.isFrequent(minisup, node.getSupport())) {
                 PFITNode child = nX.generateChildNode(node);
                 updateNodeMetrics(child, miniprob);
+                node.addChild(child);
                 if (child.getLB() <= minisup && child.getUB() >= minisup){
                     child.setProb(node.ProbabilityFrequents(child.getItems(), miniprob,nX.database.name1, nX.database.prob1));
+                    // child.Probability(child.getSupport(), child.getExpSup(), miniprob);
+
                 }
                 synchronized (xs) {
                     xs.add(child);

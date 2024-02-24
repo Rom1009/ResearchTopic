@@ -7,4 +7,3 @@ B,D,E
 B
 D
 B,C,D,E
-A,B,D

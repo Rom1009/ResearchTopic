@@ -11,7 +11,6 @@ public class Test {
         List<String> ro= new ArrayList<String>();
         ro.add("Root");
         
-        
         // Define the batch size
         int batchSize = 10000;
         // Get the transaction lists
@@ -45,12 +44,14 @@ public class Test {
             }
         }
         P.Buildtree(root, batchSize, 0.9, 0.9);
+        
         long endTime = System.nanoTime();
         System.out.println("Execution Time: " + (endTime - startTime) + " nanoseconds");
 
         long startTime1 = System.nanoTime();
         for (int i = batchSize ;i < transactionLists.size(); i++){
-            database.addNewTransaction(database.name.get(i), database.prob.get(i));
+            database.name1.add(database.name.get(i));
+            database.prob1.add(database.prob.get(i));
             PM.ADDTRANS(root, i, database, 0.9, 0.9);
             PM.DelTran(root, i, database, 0.9, 0.9);
         }
@@ -87,5 +88,6 @@ public class Test {
         // for (PFITNode child : root.getChildren()) {
         //     System.out.println(child);
         // }
+        
     }
 }

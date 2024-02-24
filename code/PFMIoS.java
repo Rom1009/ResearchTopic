@@ -17,146 +17,144 @@ public class PFMIoS {
         System.out.println("Execution Time: " + executionTime + " nanoseconds");
     }
     
-    public void ADDTRANS(PFITNode nX, int US, UncertainDatabase database, double minisup, double miniprob) {
-        if (nX.getChildren() == null) {
-            return;
-        }
+    public void ADDTRANS(PFITNode nX,int US ,UncertainDatabase database, double minisup, double miniprob) {
         List<String> value = database.name1.get(database.name1.size() - 1);
         List<Double> prob = database.prob1.get(database.prob1.size() - 1);
-
-        System.out.println(US);
         List<PFITNode> childrenCopy = new ArrayList<>();
-        List<PFITNode> newFrequent = new ArrayList<>();
+        List<PFITNode> newfre = new ArrayList<>();
         List<PFITNode> frequent = new ArrayList<>();
-        for (PFITNode nY : nX.getChildren()) {
-            List<List<String>> a = new ArrayList<>();
-            List<List<Double>> b = new ArrayList<>();
+            System.out.println(US);
 
-            a.add(value);
-            b.add(prob);
-            double OLB = nY.getLB();
-            double OUB = nY.getUB();
-            double OPS = nY.getProb();
-            
-            if (nY.isSingleElementSubset(nY.getItems(), value)) {
-                
-                nY.setSupport(nY.getSupport() + nY.Supporteds(nY.getItems(), a));
-                nY.setExpSup(nY.getExpSup() + nY.ExpSups(nY.getItems(),a,b));
-                nY.setLB(nY.LBs(nY.getExpSup(), miniprob));
-                nY.setUB(nY.UBs(nY.getExpSup(), miniprob, nY.getSupport()));
-                if (minisup >= nY.getLB() && minisup <= nY.getUB()) {
-                    nY.setProb(nY.getProb() + nY.ProbabilityFrequents(nY.getItems(), miniprob, a, b ));
+           if (nX.getChildren() == null) {
+               return;
+           }
+           
+           for (PFITNode nY: nX.getChildren()) {
+                double OLB = nY.getLB();
+                double OUB = nY.getUB();
+                double OPS = nY.getProb();
+                List<List<String>> a = new ArrayList<>();
+                List<List<Double>> b = new ArrayList<>();
+                a.add(value);
+                b.add(prob);
+                if (nY.isSingleElementSubset(nY.getItems(), value)){
+                    nY.setSupport(nY.getSupport()+nY.Supporteds(nY.getItems(),a));
+                    nY.setExpSup(nY.getExpSup()+nY.ExpSups(nY.getItems(),a,b));
+                    nY.setLB(nY.LBs(nY.getExpSup(), miniprob));
+                    nY.setUB(nY.UBs(nY.getExpSup(), miniprob, nY.getSupport()));
+                    if (minisup >= nY.getLB() && minisup <= nY.getUB()) {
+                        nY.setProb(nY.ProbabilityFrequents(nY.getItems(), miniprob,database.name1,database.prob1));
+                        // nY.Probability(nY.getSupport(), nY.getExpSup(), miniprob);
+                    }
                 }
-    
-                if (nY.checkNewFrequent(OLB, OUB, OPS, nX.getLB(), nY.getUB(), nY.getProb(), minisup)) {
-                    P.Buildtree(nY, US, minisup, miniprob);
-                    newFrequent.add(nY);
-                } 
+                if (nY.checkNewFrequent(OLB, OUB, OPS, nY.getLB(), nY.getUB(), nY.getProb(), minisup)){
+                    newfre.add(nY);
+                    List<PFITNode> nZs = nY.getRightSiblings();
+                    for (PFITNode nZ : nZs){
+                        PFITNode child = nY.generateChildNode(nZ);
+                        // child.setSupport(child.Supporteds(child.getItems(),database.name1));
+                        // child.setExpSup(child.ExpSups(child.getItems(),database.name1,database.prob1));
+                        // child.setLB(child.LBs(child.getExpSup(), miniprob));
+                        // child.setUB(child.UBs(child.getExpSup(), miniprob, child.getSupport()));
+                        childrenCopy.add(child);
+                        nY.addChild(child);
 
-                if (nY.checkFrequent(OLB, OUB, OPS, nY.getLB(), nY.getUB(), nY.getProb(), minisup)) {
+                        // if (minisup >= child.getLB() && minisup <= child.getUB()) {
+                        //     // child.setProb(child.ProbabilityFrequents(child.getItems(), miniprob,database.name1,database.prob1));
+                        //     child.Probability(child.getSupport(), child.getExpSup(), miniprob);
+                            
+                        // }
+                    }
+                }
+                if (nY.checkFrequent(OLB, OUB, OPS, nY.getLB(), nY.getUB(), nY.getProb(), minisup) && nY.isSingleElementSubset(nY.getItems(), value) ){                    
                     frequent.add(nY);
                 }
             }
-        }
-    
-        // for (PFITNode nY : newFrequent) {
-        //     List<PFITNode> nZs = nY.getRightSiblings();
-        //     for (PFITNode nZ : nZs) {
-        //         if (newFrequent.contains(nZ)) {
-        //             PFITNode child = nY.generateChildNode(nZ);
-        //             updateChildNode(child, minisup, miniprob);
-        //             childrenCopy.add(child);
-        //         }
-        //     }
-        // }
-    
-        for (PFITNode nY : frequent) {
-            List<PFITNode> nZs = nY.getRightSiblings();
-            for (PFITNode nZ : nZs) {
-                if (newFrequent.contains(nZ)) {
-                    PFITNode child = nY.generateChildNode(nZ);
-                    updateChildNode(child, minisup, miniprob);
-                    childrenCopy.add(child);
+            for (PFITNode nY : frequent){
+                List<PFITNode> nZs = nY.getRightSiblings();
+                for (PFITNode nZ : nZs){
+                    if (newfre.contains(nZ)){
+                        PFITNode child = nY.generateChildNode(nZ);
+                        // child.setSupport(child.Supporteds(child.getItems(),database.name1));
+                        // child.setExpSup(child.ExpSups(child.getItems(),database.name1,database.prob1));
+                        // child.setLB(child.LBs(child.getExpSup(),miniprob));
+                        // child.setUB(child.UBs(child.getExpSup(),miniprob, child.getSupport()));
+                        childrenCopy.add(child);
+                        nY.addChild(child);
+
+                        // if (minisup >= child.getLB() && minisup <= child.getUB()) {
+                        //     // child.setProb(child.ProbabilityFrequents(child.getItems(), miniprob,database.name1,database.prob1));
+                        //     child.Probability(child.getSupport(), child.getExpSup(), miniprob);
+
+                        // }
+                    }
                 }
             }
-        }
-    
-        nX.getChildren().addAll(childrenCopy);
+           nX.getChildren().addAll(childrenCopy);
     }
     
-    private void updateChildNode(PFITNode child, double minisup, double miniprob) {
-        child.setSupport(child.Supporteds(child.getItems(), child.database.name1));
-        child.setExpSup(child.ExpSups(child.getItems(), child.database.name1,child.database.prob1));
-        child.setLB(child.LBs(child.getExpSup(), child.getProb()));
-        child.setUB(child.UBs(child.getExpSup(), child.getProb(), child.getSupport()));
-    
-        if (minisup >= child.getLB() && minisup <= child.getUB()) {
-            child.setProb(child.ProbabilityFrequents(child.getItems(), miniprob,child.database.name1,child.database.prob1));
-        }
-    }
 
 
     public void DelTran(PFITNode nX, int US, UncertainDatabase database, double minisup, double miniprob) {
         // Lấy danh sách và danh sách xác suất từ cơ sở dữ liệu
         List<String> list = database.name1.get(0);
         List<Double> list1 = database.prob1.get(0);
-    
-        List<PFITNode> toRemove = new ArrayList<>();
         List<PFITNode> infre = new ArrayList<>();
-        List<PFITNode> frequentdel = new ArrayList<>();
         if (nX.getChildren().isEmpty()) {
             return;
         }
+        List<PFITNode> copy = new ArrayList<>(nX.getChildren());
         
         // Loại bỏ danh sách và danh sách xác suất khỏi cơ sở dữ liệu
         database.name1.remove(0);
         database.prob1.remove(0);
     
         // Tạo danh sách a và b từ list và list1 để sử dụng lại trong vòng lặp
-        List<List<String>> a = new ArrayList<>();
-        List<List<Double>> b = new ArrayList<>();
-        a.add(list);
-        b.add(list1);
-    
+        
         // Lặp qua các nút con của nX
-        for (PFITNode nY : nX.getChildren()) {
+        for (PFITNode nY : copy) {
             double OLB = nY.getLB();
             double OUB = nY.getUB();
             double OPS = nY.getProb();
+            List<List<String>> a = new ArrayList<>();
+            List<List<Double>> b = new ArrayList<>();
+            a.add(list);
+            b.add(list1);
     
-            if (nY.isSingleElementSubset(nY.getItems(), list)) {
+            if (nX.isSingleElementSubset(nY.getItems(), list)) {
                 // Thực hiện các tính toán mà không cần truy cập vào cơ sở dữ liệu
                 nY.setSupport(nY.getSupport() - nY.Supporteds(nY.getItems(), a));
                 nY.setExpSup(nY.getExpSup() - nY.ExpSups(nY.getItems(), a, b));
                 nY.setLB(nY.LBs(nY.getExpSup(), miniprob));
                 nY.setUB(nY.UBs(nY.getExpSup(), miniprob, nY.getSupport()));
                 if (minisup >= nY.getLB() && minisup <= nY.getUB()) {
-                    nY.setProb(nY.getProb() - nY.ProbabilityFrequents(nY.getItems(), miniprob, a, b));
+                    nY.setProb(nY.ProbabilityFrequents(nY.getItems(), miniprob,database.name1, database.prob1));
+                    // nY.Probability(nY.getSupport(), nY.getExpSup(), miniprob);
+
                 }
             }
     
-            if (nY.checkInfrequent(OLB, OUB, OPS, nX.getLB(), nY.getUB(), nY.getProb(), minisup)) {
-                infre.add(nY);
-                nY.setProb(0);
-                toRemove.addAll(nY.getChildren());
-            }
-            if (nY.checkFrequenDel(OLB, OUB, OPS, nX.getLB(), nY.getUB(), nY.getProb(), minisup)) {
-                frequentdel.add(nY);
+            for(PFITNode nZ: nY.getChildren()){
+                if (nZ.checkInfrequent(OLB, OUB, OPS, nZ.getLB(), nZ.getUB(), nZ.getProb(), minisup)) {
+                    nX.getChildren().remove(nZ);
+                    infre.add(nZ);
+                }
+                if (nZ.checkFrequenDel(OLB, OUB, OPS, nZ.getLB(), nZ.getUB(), nZ.getProb(), minisup) && nY.isSingleElementSubset(nY.getItems(), list)) {
+                    nX.getChildren().removeAll(nZ.getChildren());
+                }
             }
         }
-    
         // Xử lý nút infrequent và frequentdel
-        for (PFITNode nY : frequentdel) {
-            List<PFITNode> nZs = nY.getRightSiblings();
-            for (PFITNode nZ : nZs) {
-                if (infre.contains(nZ)) {
-                    toRemove.addAll(nY.getChildren());
-                }
-            }
-        }
-    
-        // Loại bỏ các nút không cần thiết
-        nX.getChildren().removeAll(toRemove);
+        // for (PFITNode nY : frequentdel) {
+        //     List<PFITNode> nZs = nY.getRightSiblings();
+        //     for (PFITNode nZ : nZs) {
+        //         if (infre.contains(nZ)) {
+        //             toRemove.addAll(nY.getChildren());
+        //         }
+        //     }
+        // }
+        // // Loại bỏ các nút không cần thiết
+        // nX.getChildren().removeAll(toRemove);
     }
     
 }

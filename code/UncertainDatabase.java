@@ -43,7 +43,6 @@ public class UncertainDatabase {
 
 
     public UncertainDatabase() {
-        transactionLists = new ArrayList<>();
         name = new ArrayList<>();
         prob = new ArrayList<>();
 
