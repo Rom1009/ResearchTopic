@@ -15,14 +15,12 @@ public class PFITNode {
     private PFITNode parent;
     private List<PFITNode> children;
     public UncertainDatabase database;
-    public List<List<String>> batch;
 
 
-    public PFITNode(List<String> itemset,UncertainDatabase database, List<List<String>> batch) {
+    public PFITNode(List<String> itemset,UncertainDatabase database) {
         this.itemset = itemset;
         this.children = new ArrayList<>();
         this.database = database;
-        this.batch = batch;
         this.sup = 0.0;
         this.esup = 0.0;
         this.psup = 0.0;
@@ -98,6 +96,10 @@ public class PFITNode {
                 '}';
     }
 
+   /*
+    * 
+    */
+
     public List<PFITNode> getRightSiblings() {
         if (parent == null) {
             return new ArrayList<>();
@@ -119,6 +121,9 @@ public class PFITNode {
 
     // Additional methods as required
 
+    /*
+    * 
+    */
     public void addChild(PFITNode child) {
         int existingChildIndex = indexOfChildWithItemset(child.getItems());
         if (existingChildIndex != -1) {
@@ -131,6 +136,10 @@ public class PFITNode {
         child.setParent(this);
     }
     
+
+    /*
+    * 
+    */
     private int indexOfChildWithItemset(List<String> itemset) {
         for (int i = 0; i < children.size(); i++) {
             if (new HashSet<>(children.get(i).getItems()).equals(new HashSet<>(itemset))) {
@@ -140,6 +149,10 @@ public class PFITNode {
         return -1; // Return -1 if no match is found
     }
 
+
+    /*
+    * 
+    */
     public PFITNode generateChildNode(PFITNode nY) {
         // Use a HashSet for better performance
         Set<String> combinedItemset = new HashSet<>(this.itemset);
@@ -149,7 +162,7 @@ public class PFITNode {
         List<String> newItemset = new ArrayList<>(combinedItemset);
         
         // Create a new node with the combined, unique itemset
-        PFITNode childNode = new PFITNode(newItemset, database, batch);
+        PFITNode childNode = new PFITNode(newItemset, database);
 
 
         // Check if the child node already exists
@@ -160,6 +173,10 @@ public class PFITNode {
         }
     }
     
+    /*
+    * 
+    */
+
     private boolean isChildNodeExists(PFITNode childNode) {
         return children.contains(childNode);
     }
@@ -167,6 +184,9 @@ public class PFITNode {
 
     private Double cachedUBsResult; // Cache result for optimization
 
+    /*
+    * 
+    */
     public boolean isFrequent(double minisup, double ub) {
         if (cachedUBsResult == null) {
             cachedUBsResult = ub;
@@ -174,6 +194,9 @@ public class PFITNode {
         return cachedUBsResult >= minisup;
     }
     
+    /*
+    * 
+    */
     public boolean isSingleElementSubset(List<String> name, List<String> items) {
         // Không thể là tập con nếu 'name' có nhiều phần tử hơn 'items'
         if (name.size() > items.size()) {
@@ -190,10 +213,78 @@ public class PFITNode {
         return items.containsAll(name);
     }
     
+    /*
+    * 
+    */
     public boolean checkProb(double lb, double ub, double minisup){
         return lb <= minisup && ub >= minisup;
     }
 
+    // public boolean checkFrequenDel(List<String> item,Map<List<String>, List<Double>> checkoriginal,Map<List<String>, List<Double>> checkupdate, double minisupp){
+    //     double OLB =  checkoriginal.get(item).get(0);
+    //     double OUB =  checkoriginal.get(item).get(1);
+    //     double OPS =  checkoriginal.get(item).get(2);
+    //     double ULB =  checkupdate.get(item).get(0);
+    //     double UUB =  checkupdate.get(item).get(1);
+    //     double UPS =  checkupdate.get(item).get(2);
+        
+    //     boolean ans1 = OLB < minisupp && OUB >= minisupp && ULB < minisupp && UUB >= minisupp && OPS >= minisupp && UPS >= minisupp;
+    //     boolean ans2 = OLB >= minisupp && ULB >= minisupp;
+    //     boolean ans3 = OLB >= minisupp && ULB < minisupp;
+       
+    //     return ans1 || ans2 || ans3;
+    // }
+    
+    
+
+    // public boolean checkInfrequent(List<String> item,Map<List<String>, List<Double>> checkoriginal,Map<List<String>, List<Double>> checkupdate, double minisupp){
+    //     double OLB =  checkoriginal.get(item).get(0);
+    //     double OUB =  checkoriginal.get(item).get(1);
+    //     double OPS =  checkoriginal.get(item).get(2);
+    //     double ULB =  checkupdate.get(item).get(0);
+    //     double UUB =  checkupdate.get(item).get(1);
+    //     double UPS =  checkupdate.get(item).get(2);
+        
+    //     boolean ans1 = OLB < minisupp && OUB >= minisupp && ULB < minisupp && UUB >= minisupp && OPS >= minisupp && UPS < minisupp;
+    //     boolean ans2 = OLB < minisupp && OUB >= minisupp && UUB < minisupp && OPS >= minisupp;
+    //     boolean ans3 = OUB >= minisupp && ULB < minisupp && UPS < minisupp;
+       
+    //     return ans1 || ans2 || ans3;
+    // }
+
+
+
+    // public boolean checkNewFrequent(List<String> item,Map<List<String>, List<Double>> checkoriginal,Map<List<String>, List<Double>> checkupdate ,  double minisupp){
+        
+    //     double OLB =  checkoriginal.get(item).get(0);
+    //     double OUB =  checkoriginal.get(item).get(1);
+    //     double OPS =  checkoriginal.get(item).get(2);
+    //     double ULB =  checkupdate.get(item).get(0);
+    //     double UUB =  checkupdate.get(item).get(1);
+    //     double UPS =  checkupdate.get(item).get(2);
+
+    //     boolean ans1 = OLB < minisupp && OUB >= minisupp && ULB < minisupp && UUB >= minisupp && OPS < minisupp && UPS >= minisupp;
+    //     boolean ans2 = OLB < minisupp && OUB >= minisupp && ULB >= minisupp && OPS < minisupp;
+    //     boolean ans3 = OUB < minisupp && UUB >= minisupp && UPS >= minisupp;
+    //     return ans1 || ans2 || ans3;
+    // }
+
+    // public boolean checkFrequent(List<String> item,Map<List<String>, List<Double>> checkoriginal,Map<List<String>, List<Double>> checkupdate ,  double minisupp){
+    //     double OLB =  checkoriginal.get(item).get(0);
+    //     double OUB =  checkoriginal.get(item).get(1);
+    //     double OPS =  checkoriginal.get(item).get(2);
+    //     double ULB =  checkupdate.get(item).get(0);
+    //     double UUB =  checkupdate.get(item).get(1);
+    //     // double UPS =  checkupdate.get(item).get(2);
+    //     boolean ans1 = OLB < minisupp && OUB >= minisupp && ULB < minisupp && UUB >= minisupp && OPS >= minisupp;
+    //     boolean ans2 = OLB < minisupp && OUB >= minisupp && ULB >= minisupp && OPS >= minisupp;
+    //     boolean ans3 = OLB >= minisupp;
+    //     return ans1 || ans2 || ans3; 
+    // }
+
+    /*
+    * 
+    */
     public boolean checkFrequenDel(double OLB, double OUB, double OPS, double ULB, double UUB, double UPS, double minisupp){
         boolean ans1 = OLB < minisupp && OUB >= minisupp && ULB < minisupp && UUB >= minisupp && OPS >= minisupp && UPS >= minisupp;
         boolean ans2 = OLB >= minisupp && ULB >= minisupp;
@@ -203,7 +294,9 @@ public class PFITNode {
     }
     
     
-
+    /*
+    * 
+    */
     public boolean checkInfrequent(double OLB, double OUB, double OPS, double ULB, double UUB, double UPS, double minisupp){
         boolean ans1 = OLB < minisupp && OUB >= minisupp && ULB < minisupp && UUB >= minisupp && OPS >= minisupp && UPS < minisupp;
         boolean ans2 = OLB < minisupp && OUB >= minisupp && UUB < minisupp && OPS >= minisupp;
@@ -212,6 +305,9 @@ public class PFITNode {
         return ans1 || ans2 || ans3;
     }
 
+    /*
+    * 
+    */
     public boolean checkNewFrequent(double OLB, double OUB, double OPS, double ULB, double UUB, double UPS, double minisupp){
         boolean ans1 = OLB < minisupp && OUB >= minisupp && ULB < minisupp && UUB >= minisupp && OPS < minisupp && UPS >= minisupp;
         boolean ans2 = OLB < minisupp && OUB >= minisupp && ULB >= minisupp && OPS < minisupp;
@@ -220,6 +316,9 @@ public class PFITNode {
         return ans1 || ans2 || ans3;
     }
 
+    /*
+    * 
+    */
     public boolean checkFrequent(double OLB, double OUB, double OPS, double ULB, double UUB, double UPS, double minisupp){
         boolean ans1 = OLB < minisupp && OUB >= minisupp && ULB < minisupp && UUB >= minisupp && OPS >= minisupp;
         boolean ans2 = OLB < minisupp && OUB >= minisupp && ULB >= minisupp && OPS >= minisupp;
@@ -227,6 +326,9 @@ public class PFITNode {
         return ans1 || ans2 || ans3; 
     }
 
+    /*
+    * 
+    */
     public double Supporteds(List<String> requiredItems, List<List<String>> name1) {
         int count = 0;
         for (List<String> transaction : name1) {
@@ -237,6 +339,9 @@ public class PFITNode {
         return count;
     }
     
+    /*
+    * 
+    */
     public double ExpSups(List<String> requiredItems, List<List<String>> name1, List<List<Double>> prob1) {
         double sum = 0.0;
         for (int i = 0; i < name1.size(); i++) {
@@ -253,14 +358,20 @@ public class PFITNode {
         return sum;
     }
     
+    /*
+    * 
+    */
     public double Probability(double sup, double esup, double miniprob){
-        double a = (2 * Math.sqrt(-2*esup*Math.log(1-miniprob)) -Math.log(miniprob) + Math.sqrt(Math.pow(Math.log(miniprob), 2) - 8*esup*Math.log(miniprob)))/2*batch.size();
-        double b = (2 * esup - Math.log(miniprob) + Math.sqrt(Math.pow(Math.log(miniprob), 2) - 8*esup*Math.log(miniprob)))/2*batch.size();
-        double c = (sup - esup + Math.sqrt(-2*esup*Math.log(1-miniprob))) / batch.size();
-        double d = sup / batch.size();
+        double a = (2 * Math.sqrt(-2*esup*Math.log(1-miniprob)) -Math.log(miniprob) + Math.sqrt(Math.pow(Math.log(miniprob), 2) - 8*esup*Math.log(miniprob)))/2*database.name1.size();
+        double b = (2 * esup - Math.log(miniprob) + Math.sqrt(Math.pow(Math.log(miniprob), 2) - 8*esup*Math.log(miniprob)))/2*database.name1.size();
+        double c = (sup - esup + Math.sqrt(-2*esup*Math.log(1-miniprob))) / database.name1.size();
+        double d = sup / database.name1.size();
         return findMin(a, b, c, d); 
     }
 
+    /*
+    * 
+    */
     private double findMin(double a, double b, double c, double d) {
         double min = a;
         if (b < min) {
@@ -275,6 +386,9 @@ public class PFITNode {
         return min;
     }
 
+    /*
+    * 
+    */
     public double ProbabilityFrequents(List<String> requiredItems, double minValue, List<List<String>> name1, List<List<Double>> prob1) {
         int count = 0;
         for (int i = 0; i < name1.size(); i++) {
@@ -296,13 +410,18 @@ public class PFITNode {
         return count;
     }
 
-
+    /*
+    * 
+    */
     public double LBs(double expectedSupport, double miniprob) {
         double v = Math.sqrt(-2 * expectedSupport * Math.log(1 - miniprob));
         double lowerBound = expectedSupport - v;
         return Max(lowerBound, 0);
     }
 
+    /*
+    * 
+    */
     // Upper Bound (ub)
     public double UBs(double expectedSupport, double miniprob, double support) {
         double upperBound = (2 * expectedSupport - Math.log(miniprob) + Math.sqrt(Math.log(2 * miniprob) - 8 * expectedSupport * Math.log(miniprob))) / 2;

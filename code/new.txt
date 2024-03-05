@@ -1,0 +1,184 @@
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.RecursiveAction;
+
+public class PFMIoS {
+
+    // private Double OLB;
+    // private Double OUB;
+    // private Double OPS;
+    PFIT P = new PFIT();
+
+    public void measureExecutionTime(Runnable code) {
+        long startTime = System.nanoTime();
+        code.run();
+        long endTime = System.nanoTime();
+        long executionTime = endTime - startTime;
+
+        System.out.println("Execution Time: " + executionTime + " nanoseconds");
+    }
+    
+    private ForkJoinPool pool = new ForkJoinPool();
+
+    public void ADDTRANS(PFITNode nX, int US, UncertainDatabase database, double minisup, double miniprob) {
+        System.out.println(US);
+
+        pool.invoke(new RecursiveAction() {
+            @Override
+            protected void compute() {
+                addTransInternal(nX, US, database, minisup, miniprob);
+            }
+            
+        });
+    }
+
+    private void addTransInternal(PFITNode nX, int US, UncertainDatabase database, double minisup, double miniprob) {
+        List<String> value = database.name1.get(database.name1.size() - 1);
+        List<Double> prob = database.prob1.get(database.prob1.size() - 1);
+        HashMap<List<String>, List<Double>> checkoriginal = new HashMap<>();
+        HashMap<List<String>, List<Double>> checkupdate = new HashMap<>();
+        if (nX.getChildren() == null) {
+            return;
+        }
+
+        for (PFITNode nY : nX.getChildren()) {
+            List<Double> Original = new ArrayList<>();
+            List<Double> Update = new ArrayList<>();
+
+            Original.add(nY.getLB());
+            Original.add(nY.getUB());
+            Original.add(nY.getProb());
+            checkoriginal.put(nY.getItems(), Original);
+
+            double lb = nY.getLB();
+            double ub = nY.getUB();
+            double pr = nY.getProb();
+
+            List<List<String>> a = new ArrayList<>();
+            List<List<Double>> b = new ArrayList<>();
+            a.add(value);
+            b.add(prob);
+
+            if (nY.isSingleElementSubset(nY.getItems(), value)) {
+                nY.setSupport(nY.getSupport() + nY.Supporteds(nY.getItems(), a));
+                nY.setExpSup(nY.getExpSup() + nY.ExpSups(nY.getItems(), a, b));
+                lb = nY.LBs(nY.getExpSup(), miniprob);
+                ub = nY.UBs(nY.getExpSup(), miniprob, nY.getSupport());
+                if (minisup >= lb && minisup <= ub) {
+                    pr = nY.ProbabilityFrequents(nY.getItems(), miniprob, database.name1, database.prob1);
+                    // pr = nY.Probability(nY.getSupport(), nY.getExpSup(), miniprob);
+                }
+
+            }
+
+            Update.add(lb);
+            Update.add(ub);
+            Update.add(pr);
+            checkupdate.put(nY.getItems(), Update);
+            nY.setLB(lb);
+            nY.setUB(ub);
+            nY.setProb(pr);
+            // addTransInternal(nY, US, database, minisup, miniprob);
+        }
+
+        for (PFITNode nY : nX.getChildren()) {
+            if (nY.checkNewFrequent(nY.getItems(), checkoriginal, checkupdate, minisup)) {
+                List<PFITNode> nZs = nY.getRightSiblings();
+                for (PFITNode nZ : nZs) {
+                    PFITNode child = nY.generateChildNode(nZ);
+                    nY.addChild(child);
+                }
+            }
+            if (nY.checkFrequent(nY.getItems(), checkoriginal, checkupdate, minisup) && nY.isSingleElementSubset(nY.getItems(), value)) {
+                List<PFITNode> nZs = nY.getRightSiblings();
+                for (PFITNode nZ : nZs) {
+                    if (nZ.checkNewFrequent(nZ.getItems(), checkoriginal, checkupdate, minisup)) {
+                        PFITNode child = nY.generateChildNode(nZ);
+                        nY.addChild(child);
+                    }
+                    
+                }
+            }
+        }
+    }
+    
+
+
+    public void DelTran(PFITNode nX, int US, UncertainDatabase database, double minisup, double miniprob) {
+        pool.invoke(new RecursiveAction() {
+            @Override
+            protected void compute() {
+                delTranInternal(nX, US, database, minisup, miniprob);
+            }
+        });
+    }
+
+    private void delTranInternal(PFITNode nX, int US, UncertainDatabase database, double minisup, double miniprob) {
+        List<String> list = database.name1.get(0);
+        List<Double> list1 = database.prob1.get(0);
+        HashMap<List<String>, List<Double>> checkoriginal = new HashMap<>();
+        HashMap<List<String>, List<Double>> checkupdate = new HashMap<>();
+
+        if (nX.getChildren().isEmpty()) {
+            return;
+        }
+
+        database.name1.remove(0);
+        database.prob1.remove(0);
+
+        for (PFITNode nY : nX.getChildren()) {
+            List<Double> Original = new ArrayList<>();
+            List<Double> Update = new ArrayList<>();
+
+            Original.add(nY.getLB());
+            Original.add(nY.getUB());
+            Original.add(nY.getProb());
+            checkoriginal.put(nY.getItems(), Original);
+
+            double lb = nY.getLB();
+            double ub = nY.getUB();
+            double pr = nY.getProb();
+
+            List<List<String>> a = new ArrayList<>();
+            List<List<Double>> b = new ArrayList<>();
+            a.add(list);
+            b.add(list1);
+
+            if (nX.isSingleElementSubset(nY.getItems(), list)) {
+                nY.setSupport(nY.getSupport() - nY.Supporteds(nY.getItems(), a));
+                nY.setExpSup(nY.getExpSup() - nY.ExpSups(nY.getItems(), a, b));
+                lb = nY.LBs(nY.getExpSup(), miniprob);
+                ub = nY.UBs(nY.getExpSup(), miniprob, nY.getSupport());
+                if (minisup >= lb && minisup <= ub) {
+                    pr = nY.Probability(nY.getSupport(), nY.getExpSup(), miniprob);
+                }
+            }
+
+            Update.add(lb);
+            Update.add(ub);
+            Update.add(pr);
+            checkupdate.put(nY.getItems(), Update);
+            nY.setLB(lb);
+            nY.setUB(ub);
+            nY.setProb(pr);
+        }
+
+        for (PFITNode nY : nX.getChildren()) {
+            if (nY.checkInfrequent(nY.getItems(), checkoriginal, checkupdate, minisup)) {
+                nY.getChildren().removeAll(nY.getChildren());
+            }
+            if (nY.checkFrequenDel(nY.getItems(), checkoriginal, checkupdate, minisup) && nY.isSingleElementSubset(nY.getItems(), list)) {
+                List<PFITNode> nZs = nY.getRightSiblings();
+                for (PFITNode nZ : nZs) {
+                    if (nZ.checkInfrequent(nZ.getItems(), checkoriginal, checkupdate, minisup)) {
+                        PFITNode child = nY.generateChildNode(nZ);
+                        nY.getChildren().remove(child);
+                    }
+                }
+            }
+        }
+    }
+    
+}

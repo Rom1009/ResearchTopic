@@ -1,64 +1,74 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+
+/*
+ * Class representing the probability distribution.
+ * Description: Using random number to generate probability Gaussian distribution
+ */
+class ProbabilityGenerator {
+    // private static final double MEAN = 0.78;
+    // private static final double STANDARD_DEVIATION = Math.sqrt(0.65);
+    private static final Random random = new Random();
+
+    public static double generateProbability(double MEAN, double STANDARD_DEVIATION) {
+        double probability = Math.exp(-(Math.pow(random.nextGaussian() - MEAN, 2) / (2 * Math.pow(STANDARD_DEVIATION, 2)))) / (Math.sqrt(2 * Math.PI) * STANDARD_DEVIATION);
+        probability = Math.max(0, Math.min(probability, 1));
+        return probability;
+    }
+}
+
+/*
+ * Class Weight of each item 
+ * Description: Generate each item's weight based on the range
+ */
+class WeightGenerator {
+    private static final double MIN_WEIGHT = 0; // Minimum weight
+    private static final double MAX_WEIGHT = 1.0; // Maximum weight
+    private static final Random random = new Random();
+
+    public static double generateWeight() {
+        // Generate a random weight between MIN_WEIGHT and MAX_WEIGHT
+        double weight = MIN_WEIGHT + (MAX_WEIGHT - MIN_WEIGHT) * random.nextDouble();
+        return weight;
+    }
+}
 
 public class ReadDataFile {
     private List<List<String>> items;
     private List<List<Double>> probs;
-
     public ReadDataFile() {
         items = new ArrayList<>();
         probs = new ArrayList<>();
     }
 
-    public double computeMean(double[] arr) {
-        double sum = 0;
-        for (double num : arr) {
-            sum += num;
-        }
-        return sum / arr.length;
-    }
+    /*
+     * Name: ReadDataWithProbabilities
+     * Input: Name of path to the file (String)
+     * Output: 2 List elements to save the results (List<List<String>> and List<<List<Double>>)
+     * Description: Read data each line from the file. After that for each item in each rows I create the probability
+     * approriate. 
+     */
+    public void readDataWithProbabilities(String filePath, double mean, double std) throws FileNotFoundException {
+        try (Scanner scanner = new Scanner(new File(filePath))) {
+            while (scanner.hasNextLine()) {
+                String[] lineItems = scanner.nextLine().split(" "); // Assuming comma-separated values
+                List<String> itemList = new ArrayList<>(Arrays.asList(lineItems));
+                List<Double> probList = new ArrayList<>();
 
-    // Function to compute the standard deviation of an array of doubles
-    public double computeStdDev(double[] arr, double mean) {
-        double sum = 0;
-        for (double num : arr) {
-            sum += Math.pow(num - mean, 2);
-        }
-        double variance = sum / arr.length;
-        return Math.sqrt(variance);
-    }
+                for (String item : itemList) {
+                    probList.add(ProbabilityGenerator.generateProbability(mean,std));
 
-    public void readDataWithProbabilities(String filePath) throws IOException {
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                List<String> rowItemsList = new ArrayList<>();
-                List<Double> rowProbabilitiesList = new ArrayList<>();
-                String[] itemsStr = line.split(" ");
-                double[] itemProbabilities = Arrays.stream(itemsStr)
-                        .mapToDouble(Double::parseDouble)
-                        .toArray();
-                double rowMean = computeMean(itemProbabilities);
-                double rowStdDev = computeStdDev(itemProbabilities, rowMean);
-                for (double itemProbability : itemProbabilities) {
-                    rowProbabilitiesList.add(computeProbability(itemProbability, rowMean, rowStdDev));
                 }
-                probs.add(rowProbabilitiesList);
 
-                for (String i : itemsStr) {
-                    rowItemsList.add(i);
-                }
-                items.add(rowItemsList);
+                probs.add(probList);
+                items.add(itemList);
             }
         }
-    }
-
-    private double computeProbability(double item, double mean, double stdDev) {
-        return 1 / (stdDev * Math.sqrt(2 * Math.PI)) * Math.exp(-Math.pow(item - mean, 2) / (2 * Math.pow(stdDev, 2)));
     }
 
     public List<List<String>> getName() {
@@ -68,6 +78,4 @@ public class ReadDataFile {
     public List<List<Double>> getProbs() {
         return probs;
     }
-
-    
 }

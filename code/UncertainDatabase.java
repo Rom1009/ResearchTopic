@@ -1,9 +1,12 @@
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+/*
+ * Class UncertainItem
+ * Description: Create 
+ */
 class UncertainItem {
     String name;
     double probability;
@@ -14,6 +17,9 @@ class UncertainItem {
     }
 }
 
+/*
+ * 
+ */
 class UncertainItemset {
     List<UncertainItem> uncertainItems;
 
@@ -22,6 +28,9 @@ class UncertainItemset {
     }
 }
 
+/*
+ * 
+ */
 class UncertainTransaction {
     String id;
     UncertainItemset uncertainItemset;
@@ -31,6 +40,7 @@ class UncertainTransaction {
         this.uncertainItemset = uncertainItemset;
     }
 }
+
 
 public class UncertainDatabase {
 
@@ -42,7 +52,7 @@ public class UncertainDatabase {
     public List<List<Double>> prob1;
 
 
-    public UncertainDatabase() {
+    public UncertainDatabase(String path, double mean, double std) {
         name = new ArrayList<>();
         prob = new ArrayList<>();
 
@@ -53,7 +63,7 @@ public class UncertainDatabase {
             // Assuming ReadDataFile class reads data and initializes name and prob
             // with corresponding values from the file.
             ReadDataFile rf = new ReadDataFile();
-            rf.readDataWithProbabilities("connect.txt");
+            rf.readDataWithProbabilities(path, mean, std);
             name = rf.getName();
             prob = rf.getProbs();
         } catch (Exception e) {
@@ -61,6 +71,9 @@ public class UncertainDatabase {
         }
     }
 
+    /*
+    * 
+    */
     public List<UncertainTransaction> getTransactionLists() {
         transactionLists = new ArrayList<>();
         int size = name.size();
@@ -83,6 +96,9 @@ public class UncertainDatabase {
         return transactionLists;
     }
 
+    /*
+    * 
+    */
     public void addNewTransaction(List<String> titles, List<Double> probs) {
         int size = titles.size();
 
@@ -95,6 +111,9 @@ public class UncertainDatabase {
         prob1.add(probs);
     }
 
+    /*
+    * 
+    */
     public List<List<String>> computeDistinctItemForBatch(List<UncertainTransaction> batch) {
         Set<String> distinctSet = new LinkedHashSet<>();
     

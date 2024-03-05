@@ -3,10 +3,12 @@ import java.util.List;
 
 public class Test {
     public static void main(String[] args) {
-        UncertainDatabase database = new UncertainDatabase();
+        UncertainDatabase database = new UncertainDatabase("Gazeele.txt", 0.5, Math.sqrt(0.58));
 
         PFIT P = new PFIT();
         PFMIoS PM = new PFMIoS();
+        PFMIoSplus PMplus = new PFMIoSplus();
+
 
         List<String> ro= new ArrayList<String>();
         ro.add("Root");
@@ -31,14 +33,14 @@ public class Test {
         }
 
         long startTime = System.nanoTime();
-        PFITNode root = new PFITNode(ro, database, database.name1);
+        PFITNode root = new PFITNode(ro, database);
         // // Compute distinct items for the current batch
         // // Process distinct items
         List<List<String>> distinctItems = database.computeDistinctItemForBatch(batch);
         for (int i = 0; i < batchSize; i += batchSize) {
             for (List<String> distinctItem : distinctItems) {
                 // Create a new root node for the current distinct item
-                PFITNode newNode = new PFITNode(distinctItem, database, database.name1);
+                PFITNode newNode = new PFITNode(distinctItem, database);
                 // Add the new node as a child to the root
                 root.addChild(newNode);
             }
@@ -46,7 +48,7 @@ public class Test {
         P.Buildtree(root, batchSize, 0.9, 0.9);
         
         long endTime = System.nanoTime();
-        System.out.println("Execution Time: " + (endTime - startTime) + " nanoseconds");
+        System.out.println("Execution Time: " + (endTime - startTime)/1_000_000.0 + " ms");
 
         long startTime1 = System.nanoTime();
         for (int i = batchSize ;i < transactionLists.size(); i++){
@@ -57,37 +59,25 @@ public class Test {
         }
 
         long endTime1 = System.nanoTime();
-        System.out.println("Execution Time: " + (endTime1 - startTime1) + " nanoseconds");
+        System.out.println("PFMIoS Algorithm");
+        System.out.println("Execution Time: " + (endTime1 - startTime1)/1_000_000.0 + " ms");
 
-        System.out.println(database.name1.size());
-        // List<List<String>> items = database.distinctItem();
-        
-        // database.getTransactionLists();
-        // for (List<String> item: items) {   
-        //     root.addChild(new PFITNode(item, database));
-        // }
-        // P.Buildtree(root, 0, 1, 0.9);
-        // List<String> item = new ArrayList<String>();
-        // List<Double> prob = new ArrayList<Double>();
-        // item.add("B");
-        // item.add("C");
-        // item.add("D");
-        // item.add("E");
-        // prob.add(1.0);
-        // prob.add(0.7);
-        // prob.add(0.9);
-        // prob.add(0.8);
-        // database.addNewTransaction(item, prob);
-        // ReadDataFile rf = new ReadDataFile();
-        // for (int i = 0; i < rf.getName().size(); i++) {
-        //     database.addNewTransaction(rf.getName().get(i), rf.getProbs().get(i));
-        // }
-        // PM.ADDTRANS(root, 0, database, 4, 0.1);
-        
-        // PM.DelTran(root,0, database, 4, 0.1);
-        // for (PFITNode child : root.getChildren()) {
-        //     System.out.println(child);
-        // }
-        
+
+
+        long startTime2 = System.nanoTime();
+        for (int i = batchSize ;i < transactionLists.size(); i++){
+            database.name1.add(database.name.get(i));
+            database.prob1.add(database.prob.get(i));
+            PMplus.ADDTRANS(root, i, database, 0.9, 0.9);
+            PMplus.DelTran(root, i, database, 0.9, 0.9);
+        }
+
+        long endTime2 = System.nanoTime();
+        System.out.println("PFMIoS+ Algorithm");
+        System.out.println("Execution Time: " + (endTime2 - startTime2) / 1_000_000.0 + " ms");
+
+        System.out.println("Result");
+
+
     }
 }
