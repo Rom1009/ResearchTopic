@@ -45,20 +45,19 @@ class UncertainTransaction {
 public class UncertainDatabase {
 
     public List<UncertainTransaction> transactionLists;
-    public List<List<String>> name;
-    public List<List<String>> name1;
+    public List<List<String>> name = new ArrayList<List<String>>();
+    public List<List<String>> name1 = new ArrayList<List<String>>();
 
-    public List<List<Double>> prob;
-    public List<List<Double>> prob1;
+    public List<List<Double>> prob =  new ArrayList<List<Double>>();
+    public List<List<Double>> prob1 =  new ArrayList<List<Double>>();
+
+    public List<List<Double>> weight =  new ArrayList<List<Double>>();
+    public List<List<Double>> weight1 =  new ArrayList<List<Double>>();
+
 
 
     public UncertainDatabase(String path, double mean, double std) {
-        name = new ArrayList<>();
-        prob = new ArrayList<>();
-
-        name1 = new ArrayList<>();
-        prob1 = new ArrayList<>();
-
+        
         try {
             // Assuming ReadDataFile class reads data and initializes name and prob
             // with corresponding values from the file.
@@ -66,6 +65,7 @@ public class UncertainDatabase {
             rf.readDataWithProbabilities(path, mean, std);
             name = rf.getName();
             prob = rf.getProbs();
+            weight = rf.getWeight();
         } catch (Exception e) {
             e.printStackTrace();
         }

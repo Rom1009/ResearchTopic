@@ -3,33 +3,41 @@ import java.util.List;
 
 public class Test {
     public static void main(String[] args) {
-        UncertainDatabase database = new UncertainDatabase("Gazeele.txt", 0.5, Math.sqrt(0.58));
+        UncertainDatabase database = new UncertainDatabase("connect.txt", 0.78, Math.sqrt(0.61));
 
         PFIT P = new PFIT();
         PFMIoS PM = new PFMIoS();
         PFMIoSplus PMplus = new PFMIoSplus();
 
 
+        wPFIT wP = new wPFIT();
+        wPFMIoS wPM = new wPFMIoS();
+        wPFMIoSplus wPMplus = new wPFMIoSplus();
+
         List<String> ro= new ArrayList<String>();
         ro.add("Root");
-        
         // Define the batch size
         int batchSize = 10000;
         // Get the transaction lists
         List<UncertainTransaction> transactionLists = database.getTransactionLists();
         // Process transactions in batches
         List<UncertainTransaction> batch = transactionLists.subList(0, batchSize);
-        for (UncertainTransaction transaction : batch) {
+        for (int i =0; i <database.name.size(); i++) {
             List<String> res = new ArrayList<String>();
             List<Double> res1 = new ArrayList<Double>();
+            List<Double> res2 = new ArrayList<Double>();
 
-            for (int i = 0; i < transaction.uncertainItemset.uncertainItems.size(); i++){
-                res.add(transaction.uncertainItemset.uncertainItems.get(i).name);
-                res1.add(transaction.uncertainItemset.uncertainItems.get(i).probability);
+
+            for (int j = 0; j < database.name.get(i).size(); j++){
+                res.add(database.name.get(i).get(j));
+                res1.add(database.prob.get(i).get(j));
+                res2.add(database.weight.get(i).get(j));
 
             }
             database.name1.add(res);
             database.prob1.add(res1);
+            database.weight1.add(res2);
+
         }
 
         long startTime = System.nanoTime();
@@ -45,7 +53,8 @@ public class Test {
                 root.addChild(newNode);
             }
         }
-        P.Buildtree(root, batchSize, 0.9, 0.9);
+        // P.Buildtree(root, batchSize, 0.9, 0.9);
+        wP.Buildtree(root, batchSize, 0.9, 0.9);
         
         long endTime = System.nanoTime();
         System.out.println("Execution Time: " + (endTime - startTime)/1_000_000.0 + " ms");
@@ -54,8 +63,9 @@ public class Test {
         for (int i = batchSize ;i < transactionLists.size(); i++){
             database.name1.add(database.name.get(i));
             database.prob1.add(database.prob.get(i));
-            PM.ADDTRANS(root, i, database, 0.9, 0.9);
-            PM.DelTran(root, i, database, 0.9, 0.9);
+            database.weight1.add(database.weight.get(i));
+            wPM.ADDTRANS(root, i, database, 0.9, 0.9);
+            wPM.DelTran(root, i, database, 0.9, 0.9);
         }
 
         long endTime1 = System.nanoTime();
@@ -68,8 +78,9 @@ public class Test {
         for (int i = batchSize ;i < transactionLists.size(); i++){
             database.name1.add(database.name.get(i));
             database.prob1.add(database.prob.get(i));
-            PMplus.ADDTRANS(root, i, database, 0.9, 0.9);
-            PMplus.DelTran(root, i, database, 0.9, 0.9);
+            database.weight1.add(database.weight.get(i));
+            wPMplus.ADDTRANS(root, i, database, 0.9, 0.9);
+            wPMplus.DelTran(root, i, database, 0.9, 0.9);
         }
 
         long endTime2 = System.nanoTime();

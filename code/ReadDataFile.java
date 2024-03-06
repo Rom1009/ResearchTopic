@@ -39,13 +39,9 @@ class WeightGenerator {
 }
 
 public class ReadDataFile {
-    private List<List<String>> items;
-    private List<List<Double>> probs;
-    public ReadDataFile() {
-        items = new ArrayList<>();
-        probs = new ArrayList<>();
-    }
-
+    private List<List<String>> items = new ArrayList<>();
+    private List<List<Double>> probs = new ArrayList<>();;
+    private List<List<Double>> weights = new ArrayList<>();
     /*
      * Name: ReadDataWithProbabilities
      * Input: Name of path to the file (String)
@@ -54,19 +50,21 @@ public class ReadDataFile {
      * approriate. 
      */
     public void readDataWithProbabilities(String filePath, double mean, double std) throws FileNotFoundException {
+        Random weightRandomizer = new Random();
         try (Scanner scanner = new Scanner(new File(filePath))) {
             while (scanner.hasNextLine()) {
                 String[] lineItems = scanner.nextLine().split(" "); // Assuming comma-separated values
                 List<String> itemList = new ArrayList<>(Arrays.asList(lineItems));
                 List<Double> probList = new ArrayList<>();
-
+                List<Double> weightList = new ArrayList<>();
                 for (String item : itemList) {
                     probList.add(ProbabilityGenerator.generateProbability(mean,std));
-
+                    weightList.add(0.1 + (1.0 - 0.1) * weightRandomizer.nextDouble());
                 }
 
                 probs.add(probList);
                 items.add(itemList);
+                weights.add(weightList);
             }
         }
     }
@@ -77,5 +75,9 @@ public class ReadDataFile {
 
     public List<List<Double>> getProbs() {
         return probs;
+    }
+
+    public List<List<Double>> getWeight() {
+        return weights;
     }
 }

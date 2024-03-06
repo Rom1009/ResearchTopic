@@ -338,6 +338,23 @@ public class PFITNode {
         }
         return count;
     }
+
+    public double weightedSupporteds(List<String> requiredItems, List<List<String>> name1, List<List<Double>> weight1) {
+        double weightedSupport = 0.0;
+        for (int i = 0; i < name1.size(); i++) {
+            List<String> transaction = name1.get(i);
+            if (transaction.containsAll(requiredItems)) {
+                double transactionWeightSum = 0.0;
+                for (String item : requiredItems) {
+                    int itemIndex = transaction.indexOf(item);
+                    transactionWeightSum += weight1.get(i).get(itemIndex);
+                }
+                weightedSupport += transactionWeightSum / requiredItems.size();  // Average weight of the itemset in this transaction
+            }
+        }
+        return weightedSupport;
+    }
+    
     
     /*
     * 
@@ -356,6 +373,76 @@ public class PFITNode {
             }
         }
         return sum;
+    }
+
+    public double weightedExpSups(List<String> requiredItems, List<List<String>> name1, List<List<Double>> prob1, List<List<Double>> weight1) {
+        double weightedExpSup = 0.0;
+        for (int i = 0; i < name1.size(); i++) {
+            List<String> transaction = name1.get(i);
+            List<Double> transactionWeights = weight1.get(i);
+            if (transaction.containsAll(requiredItems)) {
+                double transactionWeightedProb = 1.0;
+                for (String item : requiredItems) {
+                    int index = transaction.indexOf(item);
+                    transactionWeightedProb *= prob1.get(i).get(index) * transactionWeights.get(index);
+                }
+                weightedExpSup += transactionWeightedProb;
+            }
+        }
+        return weightedExpSup;
+    }
+    
+
+    /*
+    * 
+    */
+    public double ProbabilityFrequents(List<String> requiredItems, double minValue, List<List<String>> name1, List<List<Double>> prob1) {
+        int count = 0;
+        for (int i = 0; i < name1.size(); i++) {
+            if (name1.get(i).containsAll(requiredItems)) {
+                double transactionProbability = 1.0;
+                int index = name1.get(i).indexOf(requiredItems.get(0));
+                double probability = prob1.get(i).get(index);
+                if (requiredItems.contains(name1.get(i).get(index)) && probability >= minValue) {
+                    transactionProbability *= probability;
+                } else {
+                    transactionProbability = 0.0; // Set probability to 0 if any item's probability is less than minValue
+                    break;
+                }
+                if (transactionProbability > 0) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    public double weightedProbabilityFrequents(List<String> requiredItems, double minValue, List<List<String>> name1, List<List<Double>> prob1, List<List<Double>> weight1) {
+        int count = 0;
+        for (int i = 0; i < name1.size(); i++) {
+            List<String> transaction = name1.get(i);
+            if (transaction.containsAll(requiredItems)) {
+                double transactionWeightedProbability = 1.0;
+                for (String item : requiredItems) {
+                    int itemIndex = transaction.indexOf(item);
+                    double itemProbability = prob1.get(i).get(itemIndex);
+                    double itemWeight = weight1.get(i).get(itemIndex);
+                    double weightedProbability = itemProbability * itemWeight;  // Simple example of integrating weight
+                    
+                    // If the weighted probability of any item is below the threshold, exclude the transaction.
+                    if (weightedProbability < minValue) {
+                        transactionWeightedProbability = 0.0;
+                        break;
+                    }
+                    transactionWeightedProbability *= weightedProbability;
+                }
+                // If after considering all items, the transaction is still valid, increase the count.
+                if (transactionWeightedProbability > 0) {
+                    count++;
+                }
+            }
+        }
+        return count;
     }
     
     /*
@@ -384,30 +471,6 @@ public class PFITNode {
             min = d;
         }
         return min;
-    }
-
-    /*
-    * 
-    */
-    public double ProbabilityFrequents(List<String> requiredItems, double minValue, List<List<String>> name1, List<List<Double>> prob1) {
-        int count = 0;
-        for (int i = 0; i < name1.size(); i++) {
-            if (name1.get(i).containsAll(requiredItems)) {
-                double transactionProbability = 1.0;
-                int index = name1.get(i).indexOf(requiredItems.get(0));
-                double probability = prob1.get(i).get(index);
-                if (requiredItems.contains(name1.get(i).get(index)) && probability >= minValue) {
-                    transactionProbability *= probability;
-                } else {
-                    transactionProbability = 0.0; // Set probability to 0 if any item's probability is less than minValue
-                    break;
-                }
-                if (transactionProbability > 0) {
-                    count++;
-                }
-            }
-        }
-        return count;
     }
 
     /*
