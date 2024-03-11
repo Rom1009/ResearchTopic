@@ -22,21 +22,21 @@ public class Test {
         List<UncertainTransaction> transactionLists = database.getTransactionLists();
         // Process transactions in batches
         List<UncertainTransaction> batch = transactionLists.subList(0, batchSize);
-        for (int i =0; i <database.name.size(); i++) {
+        for (int i =0; i <batch.size(); i++) {
             List<String> res = new ArrayList<String>();
             List<Double> res1 = new ArrayList<Double>();
-            List<Double> res2 = new ArrayList<Double>();
+            // List<Double> res2 = new ArrayList<Double>();
 
 
             for (int j = 0; j < database.name.get(i).size(); j++){
                 res.add(database.name.get(i).get(j));
                 res1.add(database.prob.get(i).get(j));
-                res2.add(database.weight.get(i).get(j));
+                // res2.add(database.weight.get(i).get(j));
 
             }
             database.name1.add(res);
             database.prob1.add(res1);
-            database.weight1.add(res2);
+            // database.weight1.add(res2);
 
         }
 
@@ -53,8 +53,8 @@ public class Test {
                 root.addChild(newNode);
             }
         }
-        // P.Buildtree(root, batchSize, 0.9, 0.9);
-        wP.Buildtree(root, batchSize, 0.9, 0.9);
+        P.Buildtree(root, batchSize, 0.9, 0.9);
+        // wP.Buildtree(root, batchSize, 0.9, 0.9);
         
         long endTime = System.nanoTime();
         System.out.println("Execution Time: " + (endTime - startTime)/1_000_000.0 + " ms");
@@ -63,9 +63,12 @@ public class Test {
         for (int i = batchSize ;i < transactionLists.size(); i++){
             database.name1.add(database.name.get(i));
             database.prob1.add(database.prob.get(i));
-            database.weight1.add(database.weight.get(i));
-            wPM.ADDTRANS(root, i, database, 0.9, 0.9);
-            wPM.DelTran(root, i, database, 0.9, 0.9);
+            // database.weight1.add(database.weight.get(i));
+            // wPM.ADDTRANS(root, i, database, 0.9, 0.9);
+            // wPM.DelTran(root, i, database, 0.9, 0.9);
+            PM.ADDTRANS(root, i, database, 0.9, 0.9);
+            PM.DelTran(root, i, database, 0.9, 0.9);
+
         }
 
         long endTime1 = System.nanoTime();
@@ -74,21 +77,20 @@ public class Test {
 
 
 
-        long startTime2 = System.nanoTime();
-        for (int i = batchSize ;i < transactionLists.size(); i++){
-            database.name1.add(database.name.get(i));
-            database.prob1.add(database.prob.get(i));
-            database.weight1.add(database.weight.get(i));
-            wPMplus.ADDTRANS(root, i, database, 0.9, 0.9);
-            wPMplus.DelTran(root, i, database, 0.9, 0.9);
-        }
+        // long startTime2 = System.nanoTime();
+        // for (int i = batchSize ;i < transactionLists.size(); i++){
+        //     database.name1.add(database.name.get(i));
+        //     database.prob1.add(database.prob.get(i));
+        //     // database.weight1.add(database.weight.get(i));
+        //     // wPMplus.ADDTRANS(root, i, database, 0.9, 0.9);
+        //     // wPMplus.DelTran(root, i, database, 0.9, 0.9);
+        //     PMplus.ADDTRANS(root, i, database, 4, 0.1);
+        //     PMplus.DelTran(root, i, database, 4, 0.1);
 
-        long endTime2 = System.nanoTime();
-        System.out.println("PFMIoS+ Algorithm");
-        System.out.println("Execution Time: " + (endTime2 - startTime2) / 1_000_000.0 + " ms");
+        // }
 
-        System.out.println("Result");
-
-
+        // long endTime2 = System.nanoTime();
+        // System.out.println("PFMIoS+ Algorithm");
+        // System.out.println("Execution Time: " + (endTime2 - startTime2) / 1_000_000.0 + " ms");
     }
 }
