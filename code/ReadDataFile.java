@@ -16,8 +16,10 @@ class ProbabilityGenerator {
     private static final Random random = new Random();
 
     public static double generateProbability(double MEAN, double STANDARD_DEVIATION) {
-        double probability = Math.exp(-(Math.pow(random.nextGaussian() - MEAN, 2) / (2 * Math.pow(STANDARD_DEVIATION, 2)))) / (Math.sqrt(2 * Math.PI) * STANDARD_DEVIATION);
-        probability = Math.max(0, Math.min(probability, 1));
+        double value = MEAN + random.nextGaussian() * STANDARD_DEVIATION;
+
+        // Apply the sigmoid function to map the value to (0, 1)
+        double probability = 1 / (1 + Math.exp(-value));
         return probability;
     }
 }

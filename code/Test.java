@@ -3,17 +3,15 @@ import java.util.List;
 
 public class Test {
     public static void main(String[] args) {
-        UncertainDatabase database = new UncertainDatabase("connect.txt", 0.78, Math.sqrt(0.61));
+        UncertainDatabase database = new UncertainDatabase("T40I10D100K.txt", 0.79, Math.sqrt(0.61));
 
         PFIT P = new PFIT();
         PFMIoS PM = new PFMIoS();
         PFMIoSplus PMplus = new PFMIoSplus();
 
-
         wPFIT wP = new wPFIT();
         wPFMIoS wPM = new wPFMIoS();
         wPFMIoSplus wPMplus = new wPFMIoSplus();
-
         List<String> ro= new ArrayList<String>();
         ro.add("Root");
         // Define the batch size
@@ -53,7 +51,7 @@ public class Test {
                 root.addChild(newNode);
             }
         }
-        P.Buildtree(root, batchSize, 0.9, 0.9);
+        P.Buildtree(root, batchSize, 4, 0.1);
         // wP.Buildtree(root, batchSize, 0.9, 0.9);
         
         long endTime = System.nanoTime();
@@ -66,8 +64,8 @@ public class Test {
             // database.weight1.add(database.weight.get(i));
             // wPM.ADDTRANS(root, i, database, 0.9, 0.9);
             // wPM.DelTran(root, i, database, 0.9, 0.9);
-            PM.ADDTRANS(root, i, database, 0.9, 0.9);
-            PM.DelTran(root, i, database, 0.9, 0.9);
+            PM.ADDTRANS(root, i, database, 4, 0.1);
+            PM.DelTran(root, i, database, 4, 0.1);
 
         }
 
@@ -84,8 +82,8 @@ public class Test {
         //     // database.weight1.add(database.weight.get(i));
         //     // wPMplus.ADDTRANS(root, i, database, 0.9, 0.9);
         //     // wPMplus.DelTran(root, i, database, 0.9, 0.9);
-        //     PMplus.ADDTRANS(root, i, database, 4, 0.1);
-        //     PMplus.DelTran(root, i, database, 4, 0.1);
+        //     PMplus.ADDTRANS(root, i, database, 0.9, 0.9);
+        //     PMplus.DelTran(root, i, database, 0.9, 0.9);
 
         // }
 

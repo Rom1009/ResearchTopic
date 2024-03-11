@@ -26,7 +26,6 @@ public class PFMIoS {
             return;
         }
            
-           
         for (PFITNode nY: nX.getChildren()) {
             double OLB = nY.getLB();
             double OUB = nY.getUB();

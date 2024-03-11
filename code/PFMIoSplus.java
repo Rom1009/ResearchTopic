@@ -30,9 +30,9 @@ public class PFMIoSplus {
                 nY.setExpSup(nY.getExpSup()+nY.ExpSups(nY.getItems(),List.of(value),List.of(prob)));
                 nY.setLB(nY.LBs(nY.getExpSup(), miniprob));
                 nY.setUB(nY.UBs(nY.getExpSup(), miniprob, nY.getSupport()));
-                nY.setProb(0.0);
+                nY.setProb(0);
                 if (minisup >= nY.getLB() && minisup <= nY.getUB()) {
-                    nY.setProb(nY.getProb()+nY.Probability(nY.Supporteds(nY.getItems(),List.of(value)), nY.ExpSups(nY.getItems(),List.of(value),List.of(prob)), miniprob));
+                    nY.setProb(nY.Probability(nY.getSupport(), nY.getExpSup(), miniprob));
                 }
                 if (nY.checkNewFrequent(OLB, OUB, OPS, nY.getLB(), nY.getUB(), nY.getProb(), minisup)){
                     newfre.add(nY);
@@ -104,7 +104,7 @@ public class PFMIoSplus {
                 nY.setLB(nY.LBs(nY.getExpSup(), miniprob));
                 nY.setUB(nY.UBs(nY.getExpSup(), miniprob, nY.getSupport()));
                 if (minisup >= nY.getLB() && minisup <= nY.getUB()) {
-                    nY.setProb(nY.getProb() - nY.Probability(nY.Supporteds(nY.getItems(), List.of(list)), (nY.ExpSups(nY.getItems(), List.of(list),List.of(list1))), miniprob));
+                    nY.setProb(nY.Probability(nY.getSupport(), nY.getExpSup(), miniprob));
                 }
                 else{
                     nY.setProb(0);

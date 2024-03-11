@@ -38,7 +38,7 @@ public class PFITNode {
         return parent;
     }
 
-    private void setParent(PFITNode parent) {
+    public void setParent(PFITNode parent) {
         this.parent = parent;
     }
 
