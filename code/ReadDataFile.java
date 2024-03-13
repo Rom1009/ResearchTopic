@@ -20,7 +20,7 @@ class ProbabilityGenerator {
 
         // Apply the sigmoid function to map the value to (0, 1)
         double probability = 1 / (1 + Math.exp(-value));
-        return probability;
+        return value;
     }
 }
 

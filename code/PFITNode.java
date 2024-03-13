@@ -224,9 +224,9 @@ public class PFITNode {
     *              the minimum support threshold and returns true if the upper bound is sufficient to consider
     *              the itemset frequent; otherwise, it returns false.
     */
-    public boolean isFrequent(double minisup, double ub) {
+    public boolean isFrequent(double minisup, double expectedSupport) {
         if (cachedUBsResult == null) {
-            cachedUBsResult = ub;
+            cachedUBsResult = expectedSupport;
         }
         return cachedUBsResult >= minisup;
     }
@@ -375,6 +375,7 @@ public class PFITNode {
     }
     
     
+    
     /*
     * Name: ExpSups
     * Input: requiredItems, name1 (transactions), prob1 (probability values associated with each item in transactions).
@@ -451,6 +452,29 @@ public class PFITNode {
         return count;
     }
 
+    public double weightAverage(List<String> requiredItems, List<List<String>> name1, List<List<Double>> weight1, double support){
+        double weightedExpSup = 0.0;
+        for (int i = 0; i < name1.size(); i++) {
+            List<String> transaction = name1.get(i);
+            List<Double> transactionWeights = weight1.get(i);
+            if (transaction.containsAll(requiredItems)) {
+                double transactionWeightedProb = 1.0;
+                for (String item : requiredItems) {
+                    int index = transaction.indexOf(item);
+                    transactionWeightedProb *= transactionWeights.get(index);
+                }
+                weightedExpSup += transactionWeightedProb;
+            }
+        }
+        return weightedExpSup/support;
+    }
+    
+    // double sum = 0.0;
+    // for (String item : requiredItems) {
+    //     int index = transactionItemNames.indexOf(item);
+    //     transactionProbability *= (index != -1) ? prob1.get(i).get(index) : 1.0;
+    // }
+    // sum += transactionProbability;
     /*
     * Name: weightedProbabilityFrequents
     * Input: Includes weights along with the requiredItems, minValue, and transaction data.
@@ -502,7 +526,7 @@ public class PFITNode {
         return findMin(a, b, c, d); 
     }
 
-    /*
+    /* 
     * Name: findMin
     * Input: Four double values (a, b, c, d).
     * Output: double - The minimum of the four values.

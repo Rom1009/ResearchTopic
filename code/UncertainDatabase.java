@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -73,12 +75,12 @@ class UncertainTransaction {
 public class UncertainDatabase {
 
     public List<UncertainTransaction> transactionLists;
-    public List<List<String>> name = new ArrayList<>();
-    public List<List<String>> name1 = new ArrayList<>();
-    public List<List<Double>> prob = new ArrayList<>();
-    public List<List<Double>> prob1 = new ArrayList<>();
-    public List<List<Double>> weight = new ArrayList<>();
-    public List<List<Double>> weight1 = new ArrayList<>();
+    public List<List<String>> name = Collections.synchronizedList(new ArrayList<>());
+    public List<List<String>> name1 = Collections.synchronizedList(new ArrayList<>());
+    public List<List<Double>> prob = Collections.synchronizedList(new ArrayList<>());
+    public List<List<Double>> prob1 = Collections.synchronizedList(new ArrayList<>());
+    public List<List<Double>> weight = Collections.synchronizedList(new ArrayList<>());
+    public List<List<Double>> weight1 = Collections.synchronizedList(new ArrayList<>());
 
     /**
      * Constructor for UncertainDatabase.
@@ -111,7 +113,7 @@ public class UncertainDatabase {
      * Complexity: O(m * n), where m is the number of transactions and n is the average number of items per transaction.
      */
     public List<UncertainTransaction> getTransactionLists() {
-        transactionLists = new ArrayList<>();
+        transactionLists = Collections.synchronizedList(new ArrayList<>());
         int size = name.size();
 
         for (int i = 0; i < size; i++) {

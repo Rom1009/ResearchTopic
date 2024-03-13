@@ -34,7 +34,8 @@ public class wPFMIoS {
                 nY.setUB(nY.UBs(nY.getExpSup(), miniprob, nY.getSupport()));
                 nY.setProb(0);
                 if (minisup >= nY.getLB() && minisup <= nY.getUB()) {
-                    nY.setProb(nY.weightedProbabilityFrequents(nY.getItems(), miniprob,database.name1,database.prob1,database.weight1));
+                    nY.setProb(nY.weightedProbabilityFrequents(nY.getItems(), miniprob,database.name1, database.prob1,database.weight1));                        
+                    
                 }
             }
             if (nY.checkNewFrequent(OLB, OUB, OPS, nY.getLB(), nY.getUB(), nY.getProb(), minisup)){
@@ -42,10 +43,15 @@ public class wPFMIoS {
                 List<PFITNode> nZs = nY.getRightSiblings();
                 for (PFITNode nZ : nZs){
                     PFITNode child = nY.generateChildNode(nZ);
-                    child.setSupport(child.weightedSupporteds(child.getItems(),database.name1,database.weight1));
-                    child.setExpSup(child.weightedExpSups(child.getItems(),database.name1,database.prob1,database.weight1));
+                    child.setSupport(child.Supporteds(child.getItems(),database.name1));
+                    child.setExpSup(child.ExpSups(child.getItems(),database.name1,database.prob1));
+                    child.setUB(child.UBs(child.getExpSup(), miniprob, child.getSupport()));
+                    child.setLB( child.LBs(child.getExpSup(), miniprob));
                     childrenCopy.add(child);
                     nY.addChild(child);
+                    if (minisup >= child.getLB() && minisup <= child.getUB()) {       
+                        child.setProb(child.weightedProbabilityFrequents(child.getItems(), miniprob,database.name1, database.prob1,database.weight1));                        
+                    }
                 }
             }
             if (nY.checkFrequent(OLB, OUB, OPS, nY.getLB(), nY.getUB(), nY.getProb(), minisup) && nY.isSingleElementSubset(nY.getItems(), value) ){                    
@@ -58,10 +64,17 @@ public class wPFMIoS {
             for (PFITNode nZ : nZs){
                 if (newfre.contains(nZ)){
                     PFITNode child = nY.generateChildNode(nZ);
-                    child.setSupport(child.weightedSupporteds(child.getItems(),database.name1,database.weight1));
-                    child.setExpSup(child.weightedExpSups(child.getItems(),database.name1,database.prob1,database.weight1));
+                    child.setSupport(child.Supporteds(child.getItems(),database.name1));
+                    child.setExpSup(child.ExpSups(child.getItems(),database.name1,database.prob1));
+                    child.setUB(child.UBs(child.getExpSup(), miniprob, child.getSupport()));
+                    child.setLB( child.LBs(child.getExpSup(), miniprob));
                     childrenCopy.add(child);
                     nY.addChild(child);
+                    if (minisup >= child.getLB() && minisup <= child.getUB()) {
+                        // child.setProb(child.Probability(child.getSupport(), child.getExpSup(), miniprob)); 
+                        child.setProb(child.weightedProbabilityFrequents(child.getItems(), miniprob,database.name1, database.prob1,database.weight1));
+
+                    }
                 }
             }
         }
@@ -108,6 +121,7 @@ public class wPFMIoS {
                 nY.setUB(nY.UBs(nY.getExpSup(), miniprob, nY.getSupport()));
                 if (minisup >= nY.getLB() && minisup <= nY.getUB()) {
                     nY.setProb(nY.weightedProbabilityFrequents(nY.getItems(), miniprob,database.name1, database.prob1,database.weight1));
+                    // nY.setProb(nY.Probability(nY.getSupport(), nY.getExpSup(), miniprob));
                 }
                 else{
                     nY.setProb(0);

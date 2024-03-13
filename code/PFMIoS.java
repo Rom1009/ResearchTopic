@@ -22,10 +22,10 @@ public class PFMIoS {
         List<PFITNode> newfre = new ArrayList<>();
         List<PFITNode> childrenCopy = new ArrayList<>();
         List<PFITNode> frequent = new ArrayList<>();
+        System.out.println(US);
         if (nX.getChildren() == null) {
             return;
         }
-           
         for (PFITNode nY: nX.getChildren()) {
             double OLB = nY.getLB();
             double OUB = nY.getUB();
@@ -47,15 +47,19 @@ public class PFMIoS {
                         PFITNode child = nY.generateChildNode(nZ);
                         child.setSupport(child.Supporteds(child.getItems(),database.name1));
                         child.setExpSup(child.ExpSups(child.getItems(),database.name1,database.prob1));
+                        child.setLB(child.LBs(child.getExpSup(), miniprob));
+                        child.setUB(child.UBs(child.getExpSup(), miniprob,child.getSupport()));
                         childrenCopy.add(child);
-                        nY.addChild(child);
+                        nY.addChild(child);   
+                        if (minisup >= child.getLB() && minisup <= child.getUB()) {
+                            child.setProb(child.ProbabilityFrequents(child.getItems(), miniprob,database.name1,database.prob1));
+                        }
                     }
                 }
                 if (nY.checkFrequent(OLB, OUB, OPS, nY.getLB(), nY.getUB(), nY.getProb(), minisup) && nY.isSingleElementSubset(nY.getItems(), value) ){                    
                     frequent.add(nY);
                 }
             }
-            
         }
         for (PFITNode nY : frequent){
             List<PFITNode> nZs = nY.getRightSiblings();
@@ -64,7 +68,12 @@ public class PFMIoS {
                     PFITNode child = nY.generateChildNode(nZ);
                     child.setSupport(child.Supporteds(child.getItems(),database.name1));
                     child.setExpSup(child.ExpSups(child.getItems(),database.name1,database.prob1));
+                    child.setLB(child.LBs(child.getExpSup(), miniprob));
+                    child.setUB(child.UBs(child.getExpSup(), miniprob,child.getSupport()));
                     childrenCopy.add(child);
+                    if (minisup >= child.getLB() && minisup <= child.getUB()) {
+                        child.setProb(child.ProbabilityFrequents(child.getItems(), miniprob,database.name1,database.prob1));
+                    }
                     nY.addChild(child);
                 }
             }

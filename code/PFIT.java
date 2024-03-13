@@ -41,7 +41,7 @@ public class PFIT {
     */
     private void processNode(PFITNode nX, double miniprob, double minisup, List<PFITNode> xs) {
         updateNodeMetrics(nX, miniprob);
-        if (!nX.isFrequent(minisup, nX.getUB())) {
+        if (!nX.isFrequent(minisup, nX.getSupport())) {
             return;
         }        
         nX.setProb(nX.ProbabilityFrequents(nX.getItems(), miniprob, nX.database.name1, nX.database.prob1));
@@ -50,11 +50,11 @@ public class PFIT {
             if (node.isFrequent(minisup, node.getSupport())) {
                 PFITNode child = nX.generateChildNode(node);
                 updateNodeMetrics(child, miniprob);
-                node.addChild(child);
                 if (child.getLB() <= minisup && child.getUB() >= minisup){
                     child.setProb(node.ProbabilityFrequents(child.getItems(), miniprob,nX.database.name1, nX.database.prob1));
                     // child.setProb(child.Probability(child.getSupport(), child.getExpSup(), miniprob));
                 }
+                node.addChild(child);
                 synchronized (xs) {
                     xs.add(child);
                 }

@@ -35,8 +35,8 @@ public class wPFIT {
         updateNodeMetrics(nX, miniprob);
         if (!nX.isFrequent(minisup, nX.getUB())) {
             return;
-        }        
-        nX.setProb(nX.weightedProbabilityFrequents(nX.getItems(), miniprob,nX.database.name1, nX.database.prob1, nX.database.weight1));
+        }   
+        nX.setProb(nX.ProbabilityFrequents(nX.getItems(), miniprob,nX.database.name1, nX.database.prob1));
         // nX.setProb(nX.Probability(nX.getSupport(), nX.getExpSup(), miniprob));
         nX.getRightSiblings().parallelStream().forEach(node -> {
             if (node.isFrequent(minisup, node.getSupport())) {
@@ -63,8 +63,8 @@ public class wPFIT {
     */
     private void updateNodeMetrics(PFITNode node, double miniprob) {
         // Assume these methods are optimized as well.
-        node.setSupport(node.weightedSupporteds(node.getItems(), node.database.name1,node.database.weight1));
-        node.setExpSup(node.weightedExpSups(node.getItems(),node.database.name1, node.database.prob1,node.database.weight1));
+        node.setSupport(node.Supporteds(node.getItems(), node.database.name1));
+        node.setExpSup(node.ExpSups(node.getItems(),node.database.name1, node.database.prob1));
         node.setLB(node.LBs(node.getExpSup(),miniprob));
         node.setUB(node.UBs(node.getExpSup(), miniprob, node.getSupport()));
     }
