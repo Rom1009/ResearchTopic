@@ -16,6 +16,7 @@ public class PFMIoS {
     *              child nodes accordingly. It expands the tree recursively by exploring right siblings and creating
     * 
     */ 
+    PFIT P = new PFIT();
     public void ADDTRANS(PFITNode nX,int US ,UncertainDatabase database, double minisup, double miniprob) {
         List<String> value = database.name1.get(database.name1.size() - 1);
         List<Double> prob = database.prob1.get(database.prob1.size() - 1);
@@ -40,48 +41,56 @@ public class PFMIoS {
                 if (minisup >= nY.getLB() && minisup <= nY.getUB()) {
                     nY.setProb(nY.ProbabilityFrequents(nY.getItems(), miniprob,database.name1,database.prob1));
                 }
-                if (nY.checkNewFrequent(OLB, OUB, OPS, nY.getLB(), nY.getUB(), nY.getProb(), minisup)){
-                    newfre.add(nY);
-                    List<PFITNode> nZs = nY.getRightSiblings();
-                    for (PFITNode nZ : nZs){
+            }
+            if (nY.checkNewFrequent(OLB, OUB, OPS, nY.getLB(), nY.getUB(), nY.getProb(), minisup)){
+                newfre.add(nY);
+                List<PFITNode> nZs = nY.getRightSiblings();
+                for (PFITNode nZ : nZs){
+                    if (nZ.isFrequent(minisup, nZ.getSupport())){
                         PFITNode child = nY.generateChildNode(nZ);
-                        child.setSupport(child.Supporteds(child.getItems(),database.name1));
-                        child.setExpSup(child.ExpSups(child.getItems(),database.name1,database.prob1));
-                        child.setLB(child.LBs(child.getExpSup(), miniprob));
-                        child.setUB(child.UBs(child.getExpSup(), miniprob,child.getSupport()));
                         childrenCopy.add(child);
-                        nY.addChild(child);   
-                        if (minisup >= child.getLB() && minisup <= child.getUB()) {
-                            child.setProb(child.ProbabilityFrequents(child.getItems(), miniprob,database.name1,database.prob1));
+                        nY.addChild(child);
+                        if (List.of(child.getItems()).contains(database.name1)){
+                            child.setSupport(child.Supporteds(child.getItems(),database.name1));
+                            child.setExpSup(child.ExpSups(child.getItems(),database.name1,database.prob1));
+                            child.setLB(child.LBs(child.getExpSup(), miniprob));
+                            child.setUB(child.UBs(child.getExpSup(), miniprob,child.getSupport()));
+                            if (minisup >= child.getLB() && minisup <= child.getUB()) {
+                                child.setProb(child.ProbabilityFrequents(child.getItems(), miniprob,database.name1,database.prob1));
+                            }
                         }
                     }
+                    
                 }
-                if (nY.checkFrequent(OLB, OUB, OPS, nY.getLB(), nY.getUB(), nY.getProb(), minisup) && nY.isSingleElementSubset(nY.getItems(), value) ){                    
-                    frequent.add(nY);
-                }
+            }
+            else if (nY.checkFrequent(OLB, OUB, OPS, nY.getLB(), nY.getUB(), nY.getProb(), minisup) && nY.isSingleElementSubset(nY.getItems(), value) ){                    
+                frequent.add(nY);
             }
         }
         for (PFITNode nY : frequent){
             List<PFITNode> nZs = nY.getRightSiblings();
             for (PFITNode nZ : nZs){
-                if (newfre.contains(nZ)){
+                if (newfre.contains(nZ) ){
                     PFITNode child = nY.generateChildNode(nZ);
-                    child.setSupport(child.Supporteds(child.getItems(),database.name1));
-                    child.setExpSup(child.ExpSups(child.getItems(),database.name1,database.prob1));
-                    child.setLB(child.LBs(child.getExpSup(), miniprob));
-                    child.setUB(child.UBs(child.getExpSup(), miniprob,child.getSupport()));
                     childrenCopy.add(child);
-                    if (minisup >= child.getLB() && minisup <= child.getUB()) {
-                        child.setProb(child.ProbabilityFrequents(child.getItems(), miniprob,database.name1,database.prob1));
-                    }
                     nY.addChild(child);
+                    if (List.of(child.getItems()).contains(database.name1)){
+                        child.setSupport(child.Supporteds(child.getItems(),database.name1));
+                        child.setExpSup(child.ExpSups(child.getItems(),database.name1,database.prob1));
+                        child.setLB(child.LBs(child.getExpSup(), miniprob));
+                        child.setUB(child.UBs(child.getExpSup(), miniprob,child.getSupport()));
+                        
+    
+                        if (minisup >= child.getLB() && minisup <= child.getUB()) {
+                            child.setProb(child.ProbabilityFrequents(child.getItems(), miniprob,database.name1,database.prob1));
+                        }
+                    }
                 }
             }
         }
         nX.getChildren().addAll(childrenCopy);
     }
     
-
     /*
     * Name: DelTran
     * Input: PFITNode nX - The current node to process.

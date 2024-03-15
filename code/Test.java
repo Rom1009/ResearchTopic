@@ -38,7 +38,6 @@ public class Test {
 
         }
 
-        long startTime = System.nanoTime();
         PFITNode root = new PFITNode(ro, database);
         // // Compute distinct items for the current batch
         // // Process distinct items
@@ -51,14 +50,19 @@ public class Test {
                 root.addChild(newNode);
             }
         }
+        long startTime = System.nanoTime();
+
         // P.Buildtree(root, batchSize, 0.9, 0.9);
         wP.Buildtree(root, batchSize, 0.9, 0.9);
         
         long endTime = System.nanoTime();
         System.out.println("Execution Time: " + (endTime - startTime)/1_000_000.0 + " ms");
+        // for (PFITNode child : new ArrayList<>(root.getChildren())){
+        //     root.getChildren().add(child);
+        // }
 
         long startTime1 = System.nanoTime();
-        for (int i = batchSize ;i < 20000; i++){
+        for (int i = batchSize ;i < transactionLists.size(); i++){
             database.name1.add(database.name.get(i));
             database.prob1.add(database.prob.get(i));
             database.weight1.add(database.weight.get(i));
@@ -66,7 +70,6 @@ public class Test {
             wPM.DelTran(root, i, database, 0.9, 0.9);
             // PM.ADDTRANS(root, i, database, 0.9, 0.9);
             // PM.DelTran(root, i, database, 0.9, 0.9);
-
         }
 
         long endTime1 = System.nanoTime();
@@ -75,19 +78,22 @@ public class Test {
 
 
 
-        long startTime2 = System.nanoTime();
-        for (int i = batchSize ;i < 20000; i++){
-            database.name1.add(database.name.get(i));
-            database.prob1.add(database.prob.get(i));
-            database.weight1.add(database.weight.get(i));
-            wPMplus.ADDTRANS(root, i, database, 0.9, 0.9);
-            wPMplus.DelTran(root, i, database, 0.9, 0.9);
-            // PMplus.ADDTRANS(root, i, database, 0.9, 0.9);
-            // PMplus.DelTran(root, i, database, 0.9, 0.9);
+        // long startTime2 = System.nanoTime();
+        // for (int i = batchSize ;i < transactionLists.size(); i++){
+        //     database.name1.add(database.name.get(i));
+        //     database.prob1.add(database.prob.get(i));
+        //     database.weight1.add(database.weight.get(i));
+        //     wPMplus.ADDTRANS(root, i, database, 1, 0.9);
+        //     wPMplus.DelTran(root, i, database, 1, 0.9);
+        //     // PMplus.ADDTRANS(root, i, database, 0.9, 0.9);
+        //     // PMplus.DelTran(root, i, database, 0.9, 0.9);
 
+        // }
+        // long endTime2 = System.nanoTime();
+        // System.out.println("PFMIoS+ Algorithm");
+        // System.out.println("Execution Time: " + (endTime2 - startTime2) / 1_000_000.0 + " ms");
+        for(PFITNode child: root.getChildren()){
+            System.out.println(child);
         }
-        long endTime2 = System.nanoTime();
-        System.out.println("PFMIoS+ Algorithm");
-        System.out.println("Execution Time: " + (endTime2 - startTime2) / 1_000_000.0 + " ms");
     }
 }

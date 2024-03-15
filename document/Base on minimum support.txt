@@ -1,0 +1,38 @@
+Gazeele.txt mean: 0.94,variance 0.08 ( minimum probability = 0.9, full data)
+minimum support: 0.01
+wPFMIoS: 17934.6328 ms 
+wPFMIoS+: 22481.7767 ms
+
+minimum support: 0.1
+wPFMIoS: 18906.1498 ms
+wPFMIoS+: 24811.7717 ms
+
+minimum suppot: 1
+wPFMIoS: 40571.68 ms
+wPFMIoS+: 35052.911 ms
+
+Connect4.txt mean 0.78, variance 0.65 ( minimum probability = 0.9, full data)
+minimum support: 0.01
+wPFMIoS: 62228.9922 ms 
+wPFMIoS+: 156268.1909 ms
+
+minimum support: 0.1
+wPFMIoS: 94108.9786 ms
+wPFMIoS+: 100621.5258 ms
+
+minimum suppot: 1
+wPFMIoS: 82203.441 ms
+wPFMIoS+: 66500.4005 ms
+
+T40I10D100K.txt mean 0.79, variance 0.61 ( minimum probability = 0.9, full data)
+minimum support: 0.01
+wPFMIoS: 327134.0114 ms 
+wPFMIoS+: 156268.1909 ms
+
+minimum support: 0.1
+wPFMIoS: 274140.2225 ms
+wPFMIoS+: 327134.0114 ms
+
+minimum suppot: 1
+wPFMIoS: 430251.6249 ms
+wPFMIoS+: 440646.8705 ms

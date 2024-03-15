@@ -14,7 +14,7 @@ public class PFITNode {
     private List<PFITNode> children; // List of children
     public UncertainDatabase database; // database
 
-
+    
     public PFITNode(List<String> itemset,UncertainDatabase database) {
         this.itemset = itemset;
         this.children = new ArrayList<>();
