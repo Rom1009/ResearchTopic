@@ -33,20 +33,20 @@ public class wPFIT {
     */
     private void processNode(PFITNode nX, double miniprob, double minisup, List<PFITNode> xs) {
         updateNodeMetrics(nX, miniprob);
-        if (!nX.isFrequent(minisup, nX.getUB())) {
+        if (!nX.isFrequent(minisup, nX.getSupport())) {
             return;
         }   
         double w1 = nX.weightAverage(nX.getItems(), nX.database.name1, nX.database.weight1, nX.getSupport());
         // nX.setProb(w1*nX.ProbabilityFrequents(nX.getItems(), miniprob,nX.database.name1, nX.database.prob1));
         nX.setProb(w1*nX.Probability(nX.getSupport(), nX.getExpSup(), miniprob));
         nX.getRightSiblings().parallelStream().forEach(node -> {
-            if (node.isFrequent(minisup, node.getSupport()) && node.database.name1.contains(node.getItems())) {
+            if (node.isFrequent(minisup, node.getSupport())) {
                 PFITNode child = nX.generateChildNode(node);
                 updateNodeMetrics(child, miniprob);
                 nX.addChild(child);
                 if (child.getLB() <= minisup && child.getUB() >= minisup){
                     double w2 = child.weightAverage(child.getItems(), child.database.name1, child.database.weight1, child.getSupport());
-                    // child.setProb(w2*node.ProbabilityFrequents(child.getItems(), miniprob,child.database.name1, child.database.prob1));
+                    // child.setProb(w2*child.ProbabilityFrequents(child.getItems(), miniprob,child.database.name1, child.database.prob1));
                     child.setProb(w2*child.Probability(child.getSupport(), child.getExpSup(), miniprob));
                 }
                 synchronized (xs) {

@@ -34,25 +34,30 @@ public class PFMIoSplus {
                 if (minisup >= nY.getLB() && minisup <= nY.getUB()) {
                     nY.setProb(nY.Probability(nY.getSupport(), nY.getExpSup(), miniprob));
                 }
-                if (nY.checkNewFrequent(OLB, OUB, OPS, nY.getLB(), nY.getUB(), nY.getProb(), minisup)){
-                    newfre.add(nY);
-                    List<PFITNode> nZs = nY.getRightSiblings();
-                    for (PFITNode nZ : nZs){
+            }
+            if (nY.checkNewFrequent(OLB, OUB, OPS, nY.getLB(), nY.getUB(), nY.getProb(), minisup)){
+                newfre.add(nY);
+                List<PFITNode> nZs = nY.getRightSiblings();
+                for (PFITNode nZ : nZs){
+                    if (nZ.isFrequent(minisup, nZ.getSupport())){
                         PFITNode child = nY.generateChildNode(nZ);
-                        child.setSupport(child.Supporteds(child.getItems(),database.name1));
-                        child.setExpSup(child.ExpSups(child.getItems(),database.name1,database.prob1));
-                        child.setUB(child.UBs(child.getExpSup(), miniprob, child.getSupport()));
-                        child.setLB( child.LBs(child.getExpSup(), miniprob));
                         childrenCopy.add(child);
                         nY.addChild(child);
-                        if (minisup >= child.getLB() && minisup <= child.getUB()) {
-                            child.setProb(child.Probability(child.getSupport(), child.getExpSup(), miniprob));
+                        if (List.of(child.getItems()).contains(database.name1)){
+                            child.setSupport(child.Supporteds(child.getItems(),database.name1));
+                            child.setExpSup(child.ExpSups(child.getItems(),database.name1,database.prob1));
+                            child.setLB(child.LBs(child.getExpSup(), miniprob));
+                            child.setUB(child.UBs(child.getExpSup(), miniprob,child.getSupport()));
+                            if (minisup >= child.getLB() && minisup <= child.getUB()) {
+                                child.setProb(child.Probability(child.getSupport(), child.getExpSup(), miniprob));                                
+                            }
+                            
                         }
                     }
                 }
-                if (nY.checkFrequent(OLB, OUB, OPS, nY.getLB(), nY.getUB(), nY.getProb(), minisup) && nY.isSingleElementSubset(nY.getItems(), value) ){                    
-                    frequent.add(nY);
-                }
+            }
+            if (nY.checkFrequent(OLB, OUB, OPS, nY.getLB(), nY.getUB(), nY.getProb(), minisup) && nY.isSingleElementSubset(nY.getItems(), value) ){                    
+                frequent.add(nY);
             }
             
         }
@@ -61,15 +66,18 @@ public class PFMIoSplus {
             for (PFITNode nZ : nZs){
                 if (newfre.contains(nZ)){
                     PFITNode child = nY.generateChildNode(nZ);
-                    child.setSupport(child.Supporteds(child.getItems(),database.name1));
-                    child.setExpSup(child.ExpSups(child.getItems(),database.name1,database.prob1));
-                    child.setUB(child.UBs(child.getExpSup(), miniprob, child.getSupport()));
-                    child.setLB( child.LBs(child.getExpSup(), miniprob));
                     childrenCopy.add(child);
                     nY.addChild(child);
-                    if (minisup >= child.getLB() && minisup <= child.getUB()) {                        
-                        child.setProb(child.Probability(child.getSupport(), child.getExpSup(), miniprob));
-                    }                      
+                    if (List.of(child.getItems()).contains(database.name1)){
+                        child.setSupport(child.Supporteds(child.getItems(),database.name1));
+                        child.setExpSup(child.ExpSups(child.getItems(),database.name1,database.prob1));
+                        child.setLB(child.LBs(child.getExpSup(), miniprob));
+                        child.setUB(child.UBs(child.getExpSup(), miniprob,child.getSupport()));
+                        if (minisup >= child.getLB() && minisup <= child.getUB()) {
+                            child.setProb(child.Probability(child.getSupport(), child.getExpSup(), miniprob));                                                            
+                        }
+                        
+                    }
                 }
             }
         }

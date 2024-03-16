@@ -44,7 +44,7 @@ public class PFIT {
                 updateNodeMetrics(child, miniprob);
                 nX.addChild(child);
                 if (child.getLB() <= minisup && child.getUB() >= minisup){
-                    child.setProb(node.ProbabilityFrequents(child.getItems(), miniprob,child.database.name1, child.database.prob1));
+                    child.setProb(child.ProbabilityFrequents(child.getItems(), miniprob,child.database.name1, child.database.prob1));
                     // child.setProb(child.Probability(child.getSupport(), child.getExpSup(), miniprob));
                 }
                 synchronized (xs) {

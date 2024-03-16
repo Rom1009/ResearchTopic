@@ -16,14 +16,12 @@ public class PFMIoS {
     *              child nodes accordingly. It expands the tree recursively by exploring right siblings and creating
     * 
     */ 
-    PFIT P = new PFIT();
     public void ADDTRANS(PFITNode nX,int US ,UncertainDatabase database, double minisup, double miniprob) {
         List<String> value = database.name1.get(database.name1.size() - 1);
         List<Double> prob = database.prob1.get(database.prob1.size() - 1);
         List<PFITNode> newfre = new ArrayList<>();
         List<PFITNode> childrenCopy = new ArrayList<>();
         List<PFITNode> frequent = new ArrayList<>();
-        System.out.println(US);
         if (nX.getChildren() == null) {
             return;
         }
@@ -58,6 +56,7 @@ public class PFMIoS {
                             if (minisup >= child.getLB() && minisup <= child.getUB()) {
                                 child.setProb(child.ProbabilityFrequents(child.getItems(), miniprob,database.name1,database.prob1));
                             }
+                            
                         }
                     }
                     
@@ -79,8 +78,6 @@ public class PFMIoS {
                         child.setExpSup(child.ExpSups(child.getItems(),database.name1,database.prob1));
                         child.setLB(child.LBs(child.getExpSup(), miniprob));
                         child.setUB(child.UBs(child.getExpSup(), miniprob,child.getSupport()));
-                        
-    
                         if (minisup >= child.getLB() && minisup <= child.getUB()) {
                             child.setProb(child.ProbabilityFrequents(child.getItems(), miniprob,database.name1,database.prob1));
                         }

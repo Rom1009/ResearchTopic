@@ -32,7 +32,6 @@ public class wPFMIoSplus {
                 nY.setUB(nY.UBs(nY.getExpSup(), miniprob, nY.getSupport()));
                 if (minisup >= nY.getLB() && minisup <= nY.getUB()) {
                     double w1 = nY.weightAverage(nY.getItems(), nY.database.name1, nY.database.weight1, nY.getSupport());
-
                     nY.setProb(w1*nY.Probability(nY.getSupport(), nY.getExpSup(), miniprob));                        
                     
                 }
@@ -41,19 +40,20 @@ public class wPFMIoSplus {
                 newfre.add(nY);
                 List<PFITNode> nZs = nY.getRightSiblings();
                 for (PFITNode nZ : nZs){
-                    PFITNode child = nY.generateChildNode(nZ);
-                    childrenCopy.add(child);
-                    nY.addChild(child);
-                    if (List.of(child.getItems()).contains(database.name1)){
-                        child.setSupport(child.Supporteds(child.getItems(),database.name1));
-                        child.setExpSup(child.ExpSups(child.getItems(),database.name1,database.prob1));
-                        child.setUB(child.UBs(child.getExpSup(), miniprob, child.getSupport()));
-                        child.setLB( child.LBs(child.getExpSup(), miniprob));
-                        if (minisup >= child.getLB() && minisup <= child.getUB()) {       
-                            double w1 = child.weightAverage(child.getItems(), child.database.name1, child.database.weight1, child.getSupport());
-                            // child.setProb(child.Probability(child.getSupport(), child.getExpSup(), miniprob)); 
-                            
-                            child.setProb(w1*child.ProbabilityFrequents(child.getItems(), miniprob,database.name1, database.prob1));                        
+                    if (nZ.isFrequent(minisup, nZ.getSupport())){
+                        PFITNode child = nY.generateChildNode(nZ);
+                        childrenCopy.add(child);
+                        nY.addChild(child);
+                        if (List.of(child.getItems()).contains(database.name1)){
+                            child.setSupport(child.Supporteds(child.getItems(),database.name1));
+                            child.setExpSup(child.ExpSups(child.getItems(),database.name1,database.prob1));
+                            child.setUB(child.UBs(child.getExpSup(), miniprob, child.getSupport()));
+                            child.setLB( child.LBs(child.getExpSup(), miniprob));
+                            if (minisup >= child.getLB() && minisup <= child.getUB()) {       
+                                double w1 = child.weightAverage(child.getItems(), child.database.name1, child.database.weight1, child.getSupport());
+                                child.setProb(w1*child.Probability(child.getSupport(), child.getExpSup(), miniprob)); 
+                                
+                            }
                         }
                     }
                 }
@@ -77,9 +77,8 @@ public class wPFMIoSplus {
                         child.setLB( child.LBs(child.getExpSup(), miniprob));
                         if (minisup >= child.getLB() && minisup <= child.getUB()) {       
                             double w1 = child.weightAverage(child.getItems(), child.database.name1, child.database.weight1, child.getSupport());
-                            // child.setProb(child.Probability(child.getSupport(), child.getExpSup(), miniprob)); 
+                            child.setProb(w1*child.Probability(child.getSupport(), child.getExpSup(), miniprob)); 
                             
-                            child.setProb(w1*child.ProbabilityFrequents(child.getItems(), miniprob,database.name1, database.prob1));                        
                         }
                     }
 
