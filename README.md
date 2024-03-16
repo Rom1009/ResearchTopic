@@ -12,5 +12,5 @@ Open file code, go through Test.java. We have folder data including 3 uncertain 
 UncertainDatabase database = new UncertainDatabase("data/connect_0.78_0.65.txt", 0.78, Math.sqrt(0.65));
 
 I also have define batch to change how many batch you want to run. 
-Finally, you javac Test.java to tun. 
+Finally, you write javac Test.java to tun. 
 
