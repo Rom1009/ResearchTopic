@@ -18,7 +18,6 @@ public class wPFMIoS {
         if (nX.getChildren() == null) {
             return;
         }
-        
         for (PFITNode nY: nX.getChildren()) {
             double OLB = nY.getLB();
             double OUB = nY.getUB();
