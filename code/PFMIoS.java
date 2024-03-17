@@ -48,7 +48,7 @@ public class PFMIoS {
                         PFITNode child = nY.generateChildNode(nZ);
                         childrenCopy.add(child);
                         nY.addChild(child);
-                        if (List.of(child.getItems()).contains(database.name1)){
+                        if (database.name1.stream().anyMatch(sublist -> sublist.containsAll(nY.getItems()))){
                             child.setSupport(child.Supporteds(child.getItems(),database.name1));
                             child.setExpSup(child.ExpSups(child.getItems(),database.name1,database.prob1));
                             child.setLB(child.LBs(child.getExpSup(), miniprob));
@@ -56,8 +56,8 @@ public class PFMIoS {
                             if (minisup >= child.getLB() && minisup <= child.getUB()) {
                                 child.setProb(child.ProbabilityFrequents(child.getItems(), miniprob,database.name1,database.prob1));
                             }
-                            
                         }
+                            
                     }
                     
                 }
@@ -73,7 +73,7 @@ public class PFMIoS {
                     PFITNode child = nY.generateChildNode(nZ);
                     childrenCopy.add(child);
                     nY.addChild(child);
-                    if (List.of(child.getItems()).contains(database.name1)){
+                    if (database.name1.stream().anyMatch(sublist -> sublist.containsAll(nY.getItems()))){
                         child.setSupport(child.Supporteds(child.getItems(),database.name1));
                         child.setExpSup(child.ExpSups(child.getItems(),database.name1,database.prob1));
                         child.setLB(child.LBs(child.getExpSup(), miniprob));

@@ -44,15 +44,14 @@ public class wPFMIoSplus {
                         PFITNode child = nY.generateChildNode(nZ);
                         childrenCopy.add(child);
                         nY.addChild(child);
-                        if (List.of(child.getItems()).contains(database.name1)){
+                        if (database.name1.stream().anyMatch(sublist -> sublist.containsAll(nY.getItems()))){
                             child.setSupport(child.Supporteds(child.getItems(),database.name1));
                             child.setExpSup(child.ExpSups(child.getItems(),database.name1,database.prob1));
-                            child.setUB(child.UBs(child.getExpSup(), miniprob, child.getSupport()));
-                            child.setLB( child.LBs(child.getExpSup(), miniprob));
-                            if (minisup >= child.getLB() && minisup <= child.getUB()) {       
+                            child.setLB(child.LBs(child.getExpSup(), miniprob));
+                            child.setUB(child.UBs(child.getExpSup(), miniprob,child.getSupport()));
+                            if (minisup >= child.getLB() && minisup <= child.getUB()) {
                                 double w1 = child.weightAverage(child.getItems(), child.database.name1, child.database.weight1, child.getSupport());
-                                child.setProb(w1*child.Probability(child.getSupport(), child.getExpSup(), miniprob)); 
-                                
+                                child.setProb(w1*child.Probability(child.getSupport(), child.getExpSup(), miniprob));
                             }
                         }
                     }
@@ -70,15 +69,14 @@ public class wPFMIoSplus {
                     PFITNode child = nY.generateChildNode(nZ);
                     childrenCopy.add(child);
                     nY.addChild(child);
-                    if (List.of(child.getItems()).contains(database.name1)){
+                    if (database.name1.stream().anyMatch(sublist -> sublist.containsAll(nY.getItems()))){
                         child.setSupport(child.Supporteds(child.getItems(),database.name1));
                         child.setExpSup(child.ExpSups(child.getItems(),database.name1,database.prob1));
-                        child.setUB(child.UBs(child.getExpSup(), miniprob, child.getSupport()));
-                        child.setLB( child.LBs(child.getExpSup(), miniprob));
-                        if (minisup >= child.getLB() && minisup <= child.getUB()) {       
+                        child.setLB(child.LBs(child.getExpSup(), miniprob));
+                        child.setUB(child.UBs(child.getExpSup(), miniprob,child.getSupport()));
+                        if (minisup >= child.getLB() && minisup <= child.getUB()) {
                             double w1 = child.weightAverage(child.getItems(), child.database.name1, child.database.weight1, child.getSupport());
-                            child.setProb(w1*child.Probability(child.getSupport(), child.getExpSup(), miniprob)); 
-                            
+                            child.setProb(w1*child.Probability(child.getSupport(), child.getExpSup(), miniprob));
                         }
                     }
 
