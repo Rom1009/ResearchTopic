@@ -101,7 +101,7 @@ public class PFMIoS {
     *              probability, and removes or adjusts nodes and their children based on these updated metrics. The method
     *              ensures the tree reflects the current state of the database after the oldest transaction is removed.
     */
-    public void DelTran(PFITNode nX, int US, UncertainDatabase database, double minisup, double miniprob) {
+    public void DELTRANS(PFITNode nX, int US, UncertainDatabase database, double minisup, double miniprob) {
         // Lấy danh sách và danh sách xác suất từ cơ sở dữ liệu
         List<String> list = database.name1.get(0);
         List<Double> list1 = database.prob1.get(0);

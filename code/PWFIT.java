@@ -3,7 +3,7 @@ import java.util.List;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
 
-public class wPFIT {
+public class PWFIT {
     private ForkJoinPool pool = new ForkJoinPool();
 
     /*

@@ -9,9 +9,9 @@ public class Test {
         PFMIoS PM = new PFMIoS();
         PFMIoSplus PMplus = new PFMIoSplus();
 
-        wPFIT wP = new wPFIT();
-        wPFMIoS wPM = new wPFMIoS();
-        wPFMIoSplus wPMplus = new wPFMIoSplus();
+        PWFIT wP = new PWFIT();
+        PWFMIoS wPM = new PWFMIoS();
+        PWFMIoSplus wPMplus = new PWFMIoSplus();
         List<String> ro= new ArrayList<String>();
         ro.add("Root");
         // Define the batch size
@@ -64,9 +64,9 @@ public class Test {
             database.prob1.add(database.prob.get(i));
             database.weight1.add(database.weight.get(i));
             wPM.ADDTRANS(root, i, database, 0.9, 0.9);
-            wPM.DelTran(root, i, database, 0.9, 0.9);
+            wPM.DELTRANS(root, i, database, 0.9, 0.9);
             // PM.ADDTRANS(root, i, database, 0.9, 0.9);
-            // PM.DelTran(root, i, database, 0.9, 0.9);
+            // PM.DELTRANS(root, i, database, 0.9, 0.9);
         }
 
         long endTime1 = System.nanoTime();
@@ -81,9 +81,9 @@ public class Test {
         //     database.prob1.add(database.prob.get(i));
         //     database.weight1.add(database.weight.get(i));
         //     wPMplus.ADDTRANS(root, i, database, 0.9, 0.9);
-        //     wPMplus.DelTran(root, i, database, 0.9, 0.9);
+        //     wPMplus.DELTRANS(root, i, database, 0.9, 0.9);
         //     // PMplus.ADDTRANS(root, i, database, 0.9, 0.9);
-        //     // PMplus.DelTran(root, i, database, 0.9, 0.9);
+        //     // PMplus.DELTRANS(root, i, database, 0.9, 0.9);
 
         // }
         // long endTime2 = System.nanoTime();

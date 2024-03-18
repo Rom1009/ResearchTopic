@@ -10,7 +10,7 @@ public class PFITNode {
     private double psup; // probability support
     private double lb; // lower bound
     private double ub; // upper bound
-    private PFITNode parent; // parent node
+    private PFITNode Sibling; // parent node
     private List<PFITNode> children; // List of children
     public UncertainDatabase database; // database
 
@@ -34,12 +34,12 @@ public class PFITNode {
         return itemset;
     }
 
-    public PFITNode getParent() {
-        return parent;
+    public PFITNode getSibling() {
+        return Sibling;
     }
 
-    public void setParent(PFITNode parent) {
-        this.parent = parent;
+    public void setSibling(PFITNode Sibling) {
+        this.Sibling = Sibling;
     }
 
     public double getSupport() {
@@ -106,16 +106,16 @@ public class PFITNode {
     */
 
     public List<PFITNode> getRightSiblings() {
-        if (parent == null) {
+        if (Sibling == null) {
             return new ArrayList<>();
         }
 
         int sizeOfCurrentNode = this.itemset.size();
         List<PFITNode> rightSiblings = new ArrayList<>();
-        int currentIndex = parent.getChildren().indexOf(this);
+        int currentIndex = Sibling.getChildren().indexOf(this);
 
-        for (int i = currentIndex + 1; i < parent.getChildren().size(); i++) {
-            PFITNode sibling = parent.getChildren().get(i);
+        for (int i = currentIndex + 1; i < Sibling.getChildren().size(); i++) {
+            PFITNode sibling = Sibling.getChildren().get(i);
             if (sibling.getItems().size() == sizeOfCurrentNode) {
                 rightSiblings.add(sibling);
             }
@@ -142,7 +142,7 @@ public class PFITNode {
             // Add as a new child
             this.children.add(child);
         }
-        child.setParent(this);
+        child.setSibling(this);
     }
     
 
@@ -350,31 +350,7 @@ public class PFITNode {
             }
         }
         return count;
-    }
-
-   /*
-    * Name: weightedSupporteds
-    * Input: requiredItems, name1 (transactions), weight1 (weights associated with each item in transactions).
-    * Output: double - The weighted support of the required itemset.
-    * Description: Calculates the weighted support for an itemset, accounting for individual weights of items in transactions.
-    */
-    public double weightedSupporteds(List<String> requiredItems, List<List<String>> name1, List<List<Double>> weight1) {
-        double weightedSupport = 0.0;
-        for (int i = 0; i < name1.size(); i++) {
-            List<String> transaction = name1.get(i);
-            if (transaction.containsAll(requiredItems)) {
-                double transactionWeightSum = 0.0;
-                for (String item : requiredItems) {
-                    int itemIndex = transaction.indexOf(item);
-                    transactionWeightSum += weight1.get(i).get(itemIndex);
-                }
-                weightedSupport += transactionWeightSum ;  // Average weight of the itemset in this transaction
-            }
-        }
-        return weightedSupport;
-    }
-    
-    
+    }    
     
     /*
     * Name: ExpSups
@@ -397,30 +373,6 @@ public class PFITNode {
             }
         }
         return sum;
-    }
-
-    /*
-    * Name: weightedExpSups
-    * Input: Similar to ExpSups but includes item weights.
-    * Output: double - The weighted expected support.
-    * Description: Calculates the weighted expected support considering both the occurrence probability
-     and the weights of items within the transactions.
-    */
-    public double weightedExpSups(List<String> requiredItems, List<List<String>> name1, List<List<Double>> prob1, List<List<Double>> weight1) {
-        double weightedExpSup = 0.0;
-        for (int i = 0; i < name1.size(); i++) {
-            List<String> transaction = name1.get(i);
-            List<Double> transactionWeights = weight1.get(i);
-            if (transaction.containsAll(requiredItems)) {
-                double transactionWeightedProb = 1.0;
-                for (String item : requiredItems) {
-                    int index = transaction.indexOf(item);
-                    transactionWeightedProb *= prob1.get(i).get(index) * transactionWeights.get(index);
-                }
-                weightedExpSup += transactionWeightedProb;
-            }
-        }
-        return weightedExpSup;
     }
     
 
@@ -467,48 +419,6 @@ public class PFITNode {
             }
         }
         return weightedExpSup/support;
-    }
-    
-    // double sum = 0.0;
-    // for (String item : requiredItems) {
-    //     int index = transactionItemNames.indexOf(item);
-    //     transactionProbability *= (index != -1) ? prob1.get(i).get(index) : 1.0;
-    // }
-    // sum += transactionProbability;
-    /*
-    * Name: weightedProbabilityFrequents
-    * Input: Includes weights along with the requiredItems, minValue, and transaction data.
-    * Output: double - Frequency count considering weighted probabilities.
-    * Description: Similar to ProbabilityFrequents but factors in the weights of items 
-    for determining frequency based on a probabilistic threshold.
-    */
-
-    public double weightedProbabilityFrequents(List<String> requiredItems, double minValue, List<List<String>> name1, List<List<Double>> prob1, List<List<Double>> weight1) {
-        int count = 0;
-        for (int i = 0; i < name1.size(); i++) {
-            List<String> transaction = name1.get(i);
-            if (transaction.containsAll(requiredItems)) {
-                double transactionWeightedProbability = 1.0;
-                for (String item : requiredItems) {
-                    int itemIndex = transaction.indexOf(item);
-                    double itemProbability = prob1.get(i).get(itemIndex);
-                    double itemWeight = weight1.get(i).get(itemIndex);
-                    double weightedProbability = itemProbability * itemWeight;  // Simple example of integrating weight
-                    
-                    // If the weighted probability of any item is below the threshold, exclude the transaction.
-                    if (weightedProbability < minValue) {
-                        transactionWeightedProbability = 0.0;
-                        break;
-                    }
-                    transactionWeightedProbability *= weightedProbability;
-                }
-                // If after considering all items, the transaction is still valid, increase the count.
-                if (transactionWeightedProbability > 0) {
-                    count++;
-                }
-            }
-        }
-        return count;
     }
     
     /*
