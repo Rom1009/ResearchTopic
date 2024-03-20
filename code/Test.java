@@ -1,5 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class Test {
     public static void main(String[] args) {
@@ -73,21 +75,47 @@ public class Test {
         System.out.println("PFMIoS Algorithm");
         System.out.println("Execution Time: " + (endTime1 - startTime1)/1_000_000.0 + " ms");
 
+        try {
+            FileWriter myWriter = new FileWriter("outputPWFMIoS.txt");
+            for (PFITNode node : root.getChildren()){
+                myWriter.write(node.toString());
+                myWriter.write("\n");
 
+            }
+            myWriter.close();
+            System.out.println("Successfully wrote to the file.");
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
 
-        // long startTime2 = System.nanoTime();
-        // for (int i = batchSize ;i < transactionLists.size(); i++){
-        //     database.name1.add(database.name.get(i));
-        //     database.prob1.add(database.prob.get(i));
-        //     database.weight1.add(database.weight.get(i));
-        //     wPMplus.ADDTRANS(root, i, database, 0.9, 0.9);
-        //     wPMplus.DELTRANS(root, i, database, 0.9, 0.9);
-        //     // PMplus.ADDTRANS(root, i, database, 0.9, 0.9);
-        //     // PMplus.DELTRANS(root, i, database, 0.9, 0.9);
+        long startTime2 = System.nanoTime();
+        for (int i = batchSize ;i < transactionLists.size(); i++){
+            database.name1.add(database.name.get(i));
+            database.prob1.add(database.prob.get(i));
+            database.weight1.add(database.weight.get(i));
+            wPMplus.ADDTRANS(root, i, database, 0.9, 0.9);
+            wPMplus.DELTRANS(root, i, database, 0.9, 0.9);
+            // PMplus.ADDTRANS(root, i, database, 0.9, 0.9);
+            // PMplus.DELTRANS(root, i, database, 0.9, 0.9);
 
-        // }
-        // long endTime2 = System.nanoTime();
-        // System.out.println("PFMIoS+ Algorithm");
-        // System.out.println("Execution Time: " + (endTime2 - startTime2) / 1_000_000.0 + " ms");
+        }
+        long endTime2 = System.nanoTime();
+        System.out.println("PFMIoS+ Algorithm");
+        System.out.println("Execution Time: " + (endTime2 - startTime2) / 1_000_000.0 + " ms");
+
+        try {
+            FileWriter myWriter = new FileWriter("outputPWFMIoSPlus.txt");
+            for (PFITNode node : root.getChildren()){
+                myWriter.write(node.toString());
+                myWriter.write("\n");
+            }
+            myWriter.close();
+            System.out.println("Successfully wrote to the file.");
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+
     }
 }
