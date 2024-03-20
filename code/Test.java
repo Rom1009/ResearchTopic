@@ -5,7 +5,14 @@ import java.io.IOException;
 
 public class Test {
     public static void main(String[] args) {
-        UncertainDatabase database = new UncertainDatabase("data/connect_0.78_0.65.txt", 0.78, Math.sqrt(0.65));
+
+        if (args.length < 3) {
+            return;
+        }
+        String filePath = args[0];
+        double mean = Double.parseDouble(args[1]);
+        double variance = Double.parseDouble(args[2]);
+        UncertainDatabase database = new UncertainDatabase(filePath, mean, Math.sqrt(variance));
 
         PFIT P = new PFIT();
         PFMIoS PM = new PFMIoS();

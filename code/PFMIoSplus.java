@@ -94,7 +94,6 @@ public class PFMIoSplus {
      */
 
     public void DELTRANS(PFITNode nX, int US, UncertainDatabase database, double minisup, double miniprob) {
-        // Lấy danh sách và danh sách xác suất từ cơ sở dữ liệu
         List<String> list = database.name1.get(0);
         List<Double> list1 = database.prob1.get(0);
         List<PFITNode> infre = new ArrayList<>();
@@ -103,20 +102,16 @@ public class PFMIoSplus {
         }
         List<PFITNode> copy = new ArrayList<>(nX.getChildren());
         
-        // Loại bỏ danh sách và danh sách xác suất khỏi cơ sở dữ liệu
         database.name1.remove(0);
         database.prob1.remove(0);
     
-        // Tạo danh sách a và b từ list và list1 để sử dụng lại trong vòng lặp
         
-        // Lặp qua các nút con của nX
         for (PFITNode nY : copy) {
             double OLB = nY.getLB();
             double OUB = nY.getUB();
             double OPS = nY.getProb();
     
             if (nX.isSingleElementSubset(nY.getItems(), list)) {
-                // Thực hiện các tính toán mà không cần truy cập vào cơ sở dữ liệu
                 nY.setSupport(nY.getSupport() - nY.Supporteds(nY.getItems(), List.of(list)));
                 nY.setExpSup(nY.getExpSup() - nY.ExpSups(nY.getItems(), List.of(list), List.of(list1)));
                 nY.setLB(nY.LBs(nY.getExpSup(), miniprob));

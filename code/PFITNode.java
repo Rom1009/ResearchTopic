@@ -244,18 +244,14 @@ public class PFITNode {
     */
 
     public boolean isSingleElementSubset(List<String> name, List<String> items) {
-        // Không thể là tập con nếu 'name' có nhiều phần tử hơn 'items'
         if (name.size() > items.size()) {
             return false;
         }
         
-        // Nếu 'name' chỉ có một phần tử, ta chỉ cần kiểm tra xem nó có tồn tại trong 'items' không
         if (name.size() == 1) {
             return items.contains(name.get(0));
         }
         
-        // Dùng containsAll() trực tiếp từ List; không cần chuyển đổi sang HashSet
-        // Điều này lợi dụng độ phức tạp tốt hơn trong trường hợp 'name' chỉ có một phần tử
         return items.containsAll(name);
     }
     
