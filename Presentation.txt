@@ -1,0 +1,46 @@
+Thuyết trình: 
+1. Kính thưa quý thầy cô, hôm nay em đại diện nhóm em Sink or Swim sẽ trình bày về đề tài (Probabilistic weighted frequent 
+itemset mining over uncertain data streams). Với ý nghĩa là Nghiên cứu khai phá tập phổ biến có trọng số theo xác suất trên các luồng dữ liệu không chắc chắn
+Chúng em sẽ tìm các itemset trên bộ uncertain data stream và kiểm tra xem các itemset nào frequent và infrequent).
+Nhóm em dựa trên bào báo (Probabilistic frequent itemset mining over uncertain data streams) và từ đó cải biên bằng cách thêm weight vào từng itemset. 
+2. Để hiểu rõ hơn thì đây sẽ là các đinh nghĩa cần có cho việc nghiên cứu bao gồm (Uncertain item là gì ví dụ, uncertain itemset,itemset , uncertain transaction, uncertain database, uncertain 
+data stream, cách tính weight, expected support, support, lower bound, upper bound, probability support with weight). (Mỗi cái đưa ra ví dụ và giải thích)
+3. Sau khi đã nắm rõ các định nghĩa cần có trong bài thì chúng em xin tiếp tục với problem definition. Ở đây, chúng em sẽ có các input bao gồm uncertain data stream(giải thích lại), minimum support,
+minimum probability. Sau đó trượt qua từng sliding window (Giải thích slding window tương tự như từng cửa sổ uncertain data stream sẽ xử lý dựa trên từng cửa sổ này 
+). Tụi em sẽ khởi tạo một node gồm các con là itemset đơn dựa trên sliding window đầu tiên sau đó tạo cây khi hoàn tất thì thêm 1 uncertain transaction mới vô và xóa bỏ đi node đầu tiên cũ
+để tạo nên 1 sliding window mới việc này thực thi khi hoàn tất bộ dữ liệu. Out put là kiểm tra xem các itemset nào frequent và infrequent(Vậy frequent là 1 itemset nằm lớn hơn minimum support 
+đối với itemset và đối với 2 itemset trở lên ta sẽ kiểm tra lowerbound và upperbound của itemset mục đích là giảm độ tính toán probability support không cần thiết). CÒn infrequent itemset 
+là ngược lại. 
+4. Sau khi đã hiểu rõ vấn đề tụi em xử lý thì tiếp đến là phương thức chúng em triển khai. Gồm 3 giải thuật chính là BuildTree, Addtrans và DelTrans. Đầu tiên, Buildtree sẽ nhận 1 sliding
+window ban đầu, 1 node với các child node là các itemset đơn , minimum support, minimum probability. Tụi em sẽ chạy qua từng itemset con này và check xem các itemset này có frequent
+không nếu không sẽ continue và tạo ra các rightsibling node dựa trên các itemset frequent. Kiểm tra xem các rightsibbling này mà frequent thì tiến hành tạo các node con. Cuối cùng, cập nhật 
+lại các thông số và kiểm tra xem itemset có frequent không có thì tính probability support. Ở đây, tui em sẽ không sử dựng công thức tính probability support như của họ mà tích hợp
+thêm weight trên từng itemset. Khi hoàn tất, đây là kết quả. 
+5. Tiếp đến, tụi em lại lặp qua các transaction còn lại thêm từng transaction đồng thời delete các transaction cũ ở hàm deltran. Ở Addtrans, Tụi em triển khai bằng cách lặp qua các childenode
+đã có ở cây trên, sau đó kiểm tra xem có itemset nào mới hay cũ được thêm vô hay không, sau đó chúng em cập nhật lại tất cả. Khi hoàn tất, Tụi em kiểm tra các itemset xem có itemset
+nào từ infrequent lên frequent hay không có thì tụi em sẽ tạo ra cây từ nhánh này. Tiếp theo, kiểm tra xem các itemset nào vẫn giữ frequent thì sẽ tạo nhánh con với các nhánh bên phải nào 
+mà từ infrequent lên infrequent (Đây là hình ảnh biểu thị cho i - f và f - f) ở đây so sánh sẽ khác so khác với thông số probability support đã được thay đổi và đây là kết quả sau khi addtrans. 
+Sau khi đã triển khai thành công tụi em triển khai hàm deltrans nhận vào danh sách cây của hàm addtrans. Hàm Deltrans được triển khai, Deltrans sẽ lặp qua các childnode vào kiểm tra xem 
+uncertain transaction vừa xóa có nằm trong bộ cây không nếu có sẽ xóa cây đi và cập nhật lại các thông số. Khi cập nhật lại, kiểm tra xem các itemset này xem  itemset nào từ frequent thành
+infrequent nếu có sẽ xóa đi các node con của node đó. Tiếp đến, là triển khai kiểm tra các itemset xem itemset nào vẫn giữ frequent nếu có thì sẽ xóa các child node nào tạo ra bởi itemset 
+frequent này với itemset infrequent và đây là hình (f - i ) và (f - f). Sau khi hoàn tất, đây là kết quả. Thì phương thức PWFMIoS+ cũng tương tự như PWFMioS nhưng khác là thay đổi 
+cách tính probability support dựa trên heuristic rules(Đây là công thức). 
+6. Sau khi đã triển khai phương pháp nhóm tụi em tìm hiểu, tiếp đến là phần giải pháp. Dựa trên các phương thức trên tụi em triển khai giải pháp bằng hướng đối tượng để hiểu rõ thì đây là
+UML diagram tụi em có. Với UML diagram, Tụi em sẽ đầu tiên khởi tạo các Class Uncertain Item, Uncertainitemset, Uncertain Transaction, Uncertain Database với mục đích lưu trữ các item và 
+occurence probability. Đối với uncertain data được tạo để phục vụ cho cả 3 giải thuật với mục đích lưu trữ thông tin cần thiết, trong đó có phương thức lấy itemset để phục vụ cho giải thuật
+Buildtree. Sau khi đã có nơi lưu trữ dư liệu tụi em tiếp tục triển khai xây dựng một PFITNode, đây là gốc để thực thi 3 giải thuật của chúng ta. với các phương thức quan trọng là. 
+getRightSibling() với mục tiêu trả về các itemset bên phải của itemset hiện tại phục vụ cho cả 3 giải thuật. Tiếp đến là generateChildNode nhận vô 1 itemset sau đó sẽ tạo itemset từ itemset
+này với itemset hiện tại phục vụ cho cả 3 giải thuật của chúng ta. Hàm checkFrequentDel và checkinFrequnt phục vụ cho giải thuật Deltrans với đầu vào là Original và update của
+lowerbound, upperbound và probability support với mục đích kiểm tra (f - i) và (f - f). Hàm checknewFrequent và checkFrequent phục vụ cho Addtrans giải thuật với đầu vào là Original và update của
+lowerbound, upperbound và probability support với mục đích kiểm tra ( i - f) và (f - f).Hàm isFrequent sẽ kiểm tra các đơn itemset có frequent hay không lớn hơn minimum support Dùng cho 3 giải
+thuật luôn ở phần tạo nhánh cây mới.Cuối cùng quan trong không kém là hàm tính toán Support, expected support, probability support,lowerbound và upper bound phục vụ cho cả 3 giải thuật phía trên ở phần
+tính toán.Khi hoàn tất thì tụi em triển khai class PWFIT với đầu vào là 1 sliding window ban đầu, minimum spport, minimum probability, 1 node. Sau đó sẽ thực thi việc Buildtree dựa trên 
+sliding window này. Tiếp đến, Sẽ cho lặp qua các uncertaintrasnaction còn lại trượt qua trừng sliding window cập nhật lại cậy khi thêm transaction và xóa các transaction cũ. Khi hoàn tất 
+ta sẽ được danh sách sau khi chạy qua các bộ dữ liệu. Do nhóm tụi em, mới hiện ra kết quả cuối cùng sau khi lăp qua hết và không có kết quả cuối.Thì phương thức PWFMIoS+ cũng tương tự như PWFMioS nhưng khác là thay đổi 
+cách tính probability support dựa trên heuristic rules(Đây là công thức).
+7. Cuối cùng, phần thực nghiệm thì tụi em chạy trên 3 bộ dữ liệu bao gồm ....... Do không có probability nên tụi em sẽ tự genertate ra thông qua normal distribution và form lại dựa trên
+sigmoid funtion để kết quả không bị tràn số nằm trong khoảng 0 - 1, quá nhỏ hay quá lơn
+từ 20000 - 50000 và đây là kết quả cho thấy Giải thích đồ thị. Rồi đến từng minimum support với full data sau đó giải thích. Kết luận và cảm ơn quý thầy cô đã lắng nghe
+
+
+
