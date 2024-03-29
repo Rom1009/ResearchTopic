@@ -39,10 +39,10 @@ public class PWFMIoS {
                 List<PFITNode> nZs = nY.getRightSiblings();
                 for (PFITNode nZ : nZs){
                     if (nZ.isFrequent(minisup, nZ.getSupport())){
-                        PFITNode child = nY.generateChildNode(nZ);
-                        childrenCopy.add(child);
-                        nY.addChild(child);
                         if (database.name1.stream().anyMatch(sublist -> sublist.containsAll(nY.getItems()))){
+                            PFITNode child = nY.generateChildNode(nZ);
+                            childrenCopy.add(child);
+                            nY.addChild(child);
                             child.setSupport(child.Supporteds(child.getItems(),database.name1));
                             child.setExpSup(child.ExpSups(child.getItems(),database.name1,database.prob1));
                             child.setLB(child.LBs(child.getExpSup(), miniprob));
@@ -64,10 +64,10 @@ public class PWFMIoS {
             List<PFITNode> nZs = nY.getRightSiblings();
             for (PFITNode nZ : nZs){
                 if (newfre.contains(nZ)){
-                    PFITNode child = nY.generateChildNode(nZ);
-                    childrenCopy.add(child);
-                    nY.addChild(child);
                     if (database.name1.stream().anyMatch(sublist -> sublist.containsAll(nY.getItems()))){
+                        PFITNode child = nY.generateChildNode(nZ);
+                        childrenCopy.add(child);
+                        nY.addChild(child);
                         child.setSupport(child.Supporteds(child.getItems(),database.name1));
                         child.setExpSup(child.ExpSups(child.getItems(),database.name1,database.prob1));
                         child.setLB(child.LBs(child.getExpSup(), miniprob));

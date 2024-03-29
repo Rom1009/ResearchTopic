@@ -16,7 +16,6 @@ public class PFMIoSplus {
         List<PFITNode> childrenCopy = new ArrayList<>();
         List<PFITNode> newfre = new ArrayList<>();
         List<PFITNode> frequent = new ArrayList<>();
-        System.out.println(US);
         if (nX.getChildren() == null) {
             return;
         }

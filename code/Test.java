@@ -24,7 +24,7 @@ public class Test {
         List<String> ro= new ArrayList<String>();
         ro.add("Root");
         // Define the batch size
-        int batchSize = 10000;
+        int batchSize = 3;
         // Get the transaction lists
         List<UncertainTransaction> transactionLists = database.getTransactionLists();
         // Process transactions in batches
@@ -33,20 +33,19 @@ public class Test {
             List<String> res = new ArrayList<String>();
             List<Double> res1 = new ArrayList<Double>();
             List<Double> res2 = new ArrayList<Double>();
-
-
+            
+            
             for (int j = 0; j < database.name.get(i).size(); j++){
                 res.add(database.name.get(i).get(j));
                 res1.add(database.prob.get(i).get(j));
                 res2.add(database.weight.get(i).get(j));
-
+                
             }
             database.name1.add(res);
             database.prob1.add(res1);
             database.weight1.add(res2);
-
         }
-
+        
         PFITNode root = new PFITNode(ro, database);
         // // Compute distinct items for the current batch
         // // Process distinct items
@@ -62,7 +61,7 @@ public class Test {
         long startTime = System.nanoTime();
 
         // P.Buildtree(root, batchSize, 0.9, 0.9);
-        wP.Buildtree(root, batchSize, 0.9, 0.9);
+        wP.Buildtree(root, batchSize, 2 ,0.6);
         
         long endTime = System.nanoTime();
         System.out.println("Execution Time: " + (endTime - startTime)/1_000_000.0 + " ms");
@@ -72,8 +71,8 @@ public class Test {
             database.name1.add(database.name.get(i));
             database.prob1.add(database.prob.get(i));
             database.weight1.add(database.weight.get(i));
-            wPM.ADDTRANS(root, i, database, 0.9, 0.9);
-            wPM.DELTRANS(root, i, database, 0.9, 0.9);
+            wPM.ADDTRANS(root, i, database, 2, 0.6);
+            wPM.DELTRANS(root, i, database, 2, 0.6);
             // PM.ADDTRANS(root, i, database, 0.9, 0.9);
             // PM.DELTRANS(root, i, database, 0.9, 0.9);
         }
@@ -81,7 +80,7 @@ public class Test {
         long endTime1 = System.nanoTime();
         System.out.println("PFMIoS Algorithm");
         System.out.println("Execution Time: " + (endTime1 - startTime1)/1_000_000.0 + " ms");
-
+        
         try {
             FileWriter myWriter = new FileWriter("outputPWFMIoS.txt");
             for (PFITNode node : root.getChildren()){
@@ -101,8 +100,8 @@ public class Test {
             database.name1.add(database.name.get(i));
             database.prob1.add(database.prob.get(i));
             database.weight1.add(database.weight.get(i));
-            wPMplus.ADDTRANS(root, i, database, 0.9, 0.9);
-            wPMplus.DELTRANS(root, i, database, 0.9, 0.9);
+            wPMplus.ADDTRANS(root, i, database, 2, 0.6);
+            wPMplus.DELTRANS(root, i, database, 2, 0.6);
             // PMplus.ADDTRANS(root, i, database, 0.9, 0.9);
             // PMplus.DELTRANS(root, i, database, 0.9, 0.9);
 
